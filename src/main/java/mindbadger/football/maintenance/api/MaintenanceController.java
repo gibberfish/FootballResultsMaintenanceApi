@@ -1,5 +1,7 @@
 package mindbadger.football.maintenance.api;
 
+import mindbadger.football.maintenance.model.Fixture;
+import mindbadger.football.maintenance.model.SeasonDivision;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,16 +27,22 @@ public class MaintenanceController {
         System.out.println("test endpoint hit 2");
         int season = currentSeasonService.getCurrentSeason();
 
-        List<String> divisions = dataService.getSeasonDivisions(season);
+//        List<String> divisions = dataService.getSeasonDivisions(season);
+//
+//        divisions.forEach(div -> {
+//            System.out.println("Division : " + div);
+//
+//            dataService.getUnplayedFixturesForDivisionBeforeToday(season, div);
+//        });
 
-        divisions.forEach(div -> {
-            System.out.println("Division : " + div);
-
-            dataService.getUnplayedFixturesForDivisionBeforeToday(season, div);
+        List<SeasonDivision> seasonDivisions = dataService.getSeasonDivisions(season);
+        seasonDivisions.forEach(seasonDivision -> {
+            System.out.println("Division id = " + seasonDivision.getId());
+            List<Fixture> fixtures = dataService.getUnplayedFixturesForDivisionBeforeToday(seasonDivision.getId());
+            System.out.println("Fixtures returned = " + fixtures.size());
         });
 
-
-
+        System.out.println("*** Number of season divisions = " + seasonDivisions.size());
         /*
         Get current season
         Get today's date
