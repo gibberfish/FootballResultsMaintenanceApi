@@ -1,4 +1,7 @@
-package mindbadger.football.maintenance.model;
+package mindbadger.football.maintenance.model.base;
+
+import mindbadger.football.maintenance.model.base.Data;
+import mindbadger.football.maintenance.model.base.Links;
 
 public class Relationship {
     Data data;

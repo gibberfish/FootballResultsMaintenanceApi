@@ -1,4 +1,4 @@
-package mindbadger.football.maintenance.api;
+package mindbadger.football.maintenance.util;
 
 import org.springframework.stereotype.Component;
 
@@ -12,6 +12,9 @@ public class CurrentSeasonService {
         int month = date.getMonthValue();
 
         if (month < 8) year--;
+
+        //TODO Remove this...
+        year = 2017;
 
         return year;
     }

@@ -1,19 +1,25 @@
-package mindbadger.football.maintenance.model;
+package mindbadger.football.maintenance.model.seasondivision;
 
-public class SeasonDivision extends JsonApiBase{
+import mindbadger.football.maintenance.model.base.JsonApiBase;
+import mindbadger.football.maintenance.model.base.Links;
+import mindbadger.football.maintenance.model.base.Relationship;
+import mindbadger.football.maintenance.model.season.Season;
+
+public class SeasonDivision extends JsonApiBase {
     private Attributes attributes;
     private Relationships relationships;
 
 
-    public SeasonDivision () {}
-    public SeasonDivision (String id, String type, Links links, Attributes attributes, Relationships relationships) {
-        this.id = id;
-        this.type = type;
-        this.links = links;
-        this.attributes = attributes;
-        this.relationships = relationships;
+    public SeasonDivision () {
+        this.attributes = new SeasonDivision.Attributes();
+        this.relationships = new SeasonDivision.Relationships();
+        this.links = new Links();
+        this.type = "seasonDivisions";
     }
 
+    public String getUniqueKey () {
+        return attributes.getSeasonNumber() + "_" + attributes.getDivisionId();
+    }
 
     public Attributes getAttributes() {
         return attributes;
@@ -31,7 +37,7 @@ public class SeasonDivision extends JsonApiBase{
         this.relationships = relationships;
     }
 
-    private class Attributes {
+    public class Attributes {
         private int position;
         private int seasonNumber;
         private String divisionId;
@@ -61,7 +67,7 @@ public class SeasonDivision extends JsonApiBase{
         }
     }
 
-    private class Relationships {
+    public class Relationships {
         private Relationship division;
         private Relationship teams;
         private Relationship fixtureDates;

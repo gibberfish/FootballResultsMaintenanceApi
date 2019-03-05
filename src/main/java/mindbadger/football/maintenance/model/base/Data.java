@@ -1,4 +1,4 @@
-package mindbadger.football.maintenance.model;
+package mindbadger.football.maintenance.model.base;
 
 public class Data {
     private String id;

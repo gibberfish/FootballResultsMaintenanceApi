@@ -1,4 +1,7 @@
-package mindbadger.football.maintenance.model;
+package mindbadger.football.maintenance.model.base;
+
+import mindbadger.football.maintenance.model.base.Links;
+import mindbadger.football.maintenance.model.base.Meta;
 
 public class JsonApiResponseBase {
     protected Links links;
