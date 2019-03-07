@@ -147,14 +147,22 @@ public class MaintenanceController {
 
         List<WebReaderFixture> fixturesForBoxingDay = getFixturesOnBoxingDay (season);
 
+        Map<Integer, String> teamsOnBoxingDay = new HashMap<>();
+        Map<Integer, String> otherTeams = new HashMap<>();
+
         Map<String, SeasonDivisionTeam> seasonDivisionTeamMap = new HashMap<>();
         Map<String, SeasonDivision> seasonDivisionMap = new HashMap<>();
 
         for (WebReaderFixture webReaderFixture : fixturesForBoxingDay) {
+            teamsOnBoxingDay.put(webReaderFixture.getHomeTeamId(), webReaderFixture.getHomeTeamName());
+            teamsOnBoxingDay.put(webReaderFixture.getAwayTeamId(), webReaderFixture.getAwayTeamName());
+        }
 
-            String teamIdToUseToLoadFixtures = getTeamIdForWebReaderTeamAndCreateIfNotExists(webReaderFixture.getHomeTeamId(), webReaderFixture.getHomeTeamName());
+        for (Map.Entry<Integer, String> entry : teamsOnBoxingDay.entrySet()) {
 
-            List<WebReaderFixture> fixturesForTeam = webReaderService.getFixturesForTeam(season, webReaderFixture.getHomeTeamId().toString());
+            String teamIdToUseToLoadFixtures = getTeamIdForWebReaderTeamAndCreateIfNotExists(entry.getKey(), entry.getValue());
+
+            List<WebReaderFixture> fixturesForTeam = webReaderService.getFixturesForTeam(season, entry.getKey().toString());
 
             if (fixturesForTeam == null) {
                 System.out.println("Failed to get fixtures for team for " + teamIdToUseToLoadFixtures + " ... skipping");
@@ -162,42 +170,26 @@ public class MaintenanceController {
             }
 
             for (WebReaderFixture webReaderFixture2 : fixturesForTeam) {
-                String divisionId = mappingCache.getMappedDivisions().get(webReaderFixture2.getDivisionId());
-                SeasonDivision seasonDivision = new SeasonDivision();
-                seasonDivision.getAttributes().setSeasonNumber(Integer.parseInt(season));
-                seasonDivision.getAttributes().setDivisionId(divisionId);
-                seasonDivisionMap.put(seasonDivision.getUniqueKey(), seasonDivision);
+                otherTeams.put(webReaderFixture2.getHomeTeamId(), webReaderFixture2.getHomeTeamName());
+                otherTeams.put(webReaderFixture2.getAwayTeamId(), webReaderFixture2.getAwayTeamName());
 
-                System.out.println("Web reader home team id = " + webReaderFixture2.getHomeTeamId());
-                System.out.println("Web reader away team id = " + webReaderFixture2.getAwayTeamId());
+                processWebReaderFixture(season, fixtureMap, seasonDivisionTeamMap, seasonDivisionMap, webReaderFixture2);
+            }
+        }
 
-                String homeTeamId = getTeamIdForWebReaderTeamAndCreateIfNotExists(webReaderFixture2.getHomeTeamId(), webReaderFixture2.getHomeTeamName());
-                SeasonDivisionTeam seasonDivisionTeam = new SeasonDivisionTeam();
-                seasonDivisionTeam.getAttributes().setSeasonNumber(Integer.parseInt(season));
-                seasonDivisionTeam.getAttributes().setDivisionId(divisionId);
-                seasonDivisionTeam.getAttributes().setTeamId(homeTeamId);
-                seasonDivisionTeamMap.put(seasonDivisionTeam.getUniqueKey(), seasonDivisionTeam);
+        for (Map.Entry<Integer, String> entry : otherTeams.entrySet()) {
 
-                String awayTeamId = getTeamIdForWebReaderTeamAndCreateIfNotExists(webReaderFixture2.getAwayTeamId(), webReaderFixture2.getAwayTeamName());
-                seasonDivisionTeam = new SeasonDivisionTeam();
-                seasonDivisionTeam.getAttributes().setSeasonNumber(Integer.parseInt(season));
-                seasonDivisionTeam.getAttributes().setDivisionId(divisionId);
-                seasonDivisionTeam.getAttributes().setTeamId(awayTeamId);
-                seasonDivisionTeamMap.put(seasonDivisionTeam.getUniqueKey(), seasonDivisionTeam);
+            String teamIdToUseToLoadFixtures = getTeamIdForWebReaderTeamAndCreateIfNotExists(entry.getKey(), entry.getValue());
 
-                String key = getKeyFromWebFixture (webReaderFixture2);
-                System.out.println("Key from webReaderFixture=" + key);
-                Fixture fixture = fixtureMap.get(key);
-                if (fixture != null) {
-                    System.out.println("Got key... updating...");
-                    fixture.updateFixtureFromWebFixture(webReaderFixture2,mappingCache);
-                } else {
-                    System.out.println("No match... creating new...");
-                    fixture = new Fixture();
-                    fixture.updateFixtureFromWebFixture(webReaderFixture2,mappingCache);
-                    System.out.println("Key of new fixture = " + fixture.getUniqueCompositeKey());
-                    fixtureMap.put(fixture.getUniqueCompositeKey(), fixture);
-                }
+            List<WebReaderFixture> fixturesForTeam = webReaderService.getFixturesForTeam(season, entry.getKey().toString());
+
+            if (fixturesForTeam == null) {
+                System.out.println("Failed to get fixtures for team for " + teamIdToUseToLoadFixtures + " ... skipping");
+                continue;
+            }
+
+            for (WebReaderFixture webReaderFixture2 : fixturesForTeam) {
+                processWebReaderFixture(season, fixtureMap, seasonDivisionTeamMap, seasonDivisionMap, webReaderFixture2);
             }
         }
 
@@ -219,6 +211,45 @@ public class MaintenanceController {
         }
 
         return new ResponseEntity<>("Initialise Team Complete", HttpStatus.OK);
+    }
+
+    private void processWebReaderFixture(@RequestParam("season") String season, Map<String, Fixture> fixtureMap, Map<String, SeasonDivisionTeam> seasonDivisionTeamMap, Map<String, SeasonDivision> seasonDivisionMap, WebReaderFixture webReaderFixture2) {
+        String divisionId = mappingCache.getMappedDivisions().get(webReaderFixture2.getDivisionId());
+        SeasonDivision seasonDivision = new SeasonDivision();
+        seasonDivision.getAttributes().setSeasonNumber(Integer.parseInt(season));
+        seasonDivision.getAttributes().setDivisionId(divisionId);
+        seasonDivisionMap.put(seasonDivision.getUniqueKey(), seasonDivision);
+
+        System.out.println("Web reader home team id = " + webReaderFixture2.getHomeTeamId());
+        System.out.println("Web reader away team id = " + webReaderFixture2.getAwayTeamId());
+
+        String homeTeamId = getTeamIdForWebReaderTeamAndCreateIfNotExists(webReaderFixture2.getHomeTeamId(), webReaderFixture2.getHomeTeamName());
+        SeasonDivisionTeam seasonDivisionTeam = new SeasonDivisionTeam();
+        seasonDivisionTeam.getAttributes().setSeasonNumber(Integer.parseInt(season));
+        seasonDivisionTeam.getAttributes().setDivisionId(divisionId);
+        seasonDivisionTeam.getAttributes().setTeamId(homeTeamId);
+        seasonDivisionTeamMap.put(seasonDivisionTeam.getUniqueKey(), seasonDivisionTeam);
+
+        String awayTeamId = getTeamIdForWebReaderTeamAndCreateIfNotExists(webReaderFixture2.getAwayTeamId(), webReaderFixture2.getAwayTeamName());
+        seasonDivisionTeam = new SeasonDivisionTeam();
+        seasonDivisionTeam.getAttributes().setSeasonNumber(Integer.parseInt(season));
+        seasonDivisionTeam.getAttributes().setDivisionId(divisionId);
+        seasonDivisionTeam.getAttributes().setTeamId(awayTeamId);
+        seasonDivisionTeamMap.put(seasonDivisionTeam.getUniqueKey(), seasonDivisionTeam);
+
+        String key = getKeyFromWebFixture (webReaderFixture2);
+        System.out.println("Key from webReaderFixture=" + key);
+        Fixture fixture = fixtureMap.get(key);
+        if (fixture != null) {
+            System.out.println("Got key... updating...");
+            fixture.updateFixtureFromWebFixture(webReaderFixture2,mappingCache);
+        } else {
+            System.out.println("No match... creating new...");
+            fixture = new Fixture();
+            fixture.updateFixtureFromWebFixture(webReaderFixture2,mappingCache);
+            System.out.println("Key of new fixture = " + fixture.getUniqueCompositeKey());
+            fixtureMap.put(fixture.getUniqueCompositeKey(), fixture);
+        }
     }
 
     private String getTeamIdForWebReaderTeamAndCreateIfNotExists (Integer webReaderTeamId, String teamName) {
@@ -355,7 +386,7 @@ public class MaintenanceController {
     }
 
     private void createSeasonIfNotExists(String season) {
-        dataService.createFixtureIfNotExists (season);
+        dataService.createSeasonIfNotExists(season);
     }
 
 

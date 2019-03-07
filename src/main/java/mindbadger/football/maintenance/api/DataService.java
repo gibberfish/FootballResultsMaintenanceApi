@@ -4,16 +4,17 @@ import com.google.gson.Gson;
 import mindbadger.football.maintenance.model.Fixture.Fixture;
 import mindbadger.football.maintenance.model.Fixture.FixturesList;
 import mindbadger.football.maintenance.model.Fixture.SingleFixture;
-import mindbadger.football.maintenance.model.base.JsonApiList;
 import mindbadger.football.maintenance.model.mapping.Mapping;
 import mindbadger.football.maintenance.model.mapping.MappingsList;
 import mindbadger.football.maintenance.model.mapping.SingleMapping;
 import mindbadger.football.maintenance.model.season.Season;
+import mindbadger.football.maintenance.model.season.SeasonsList;
 import mindbadger.football.maintenance.model.season.SingleSeason;
 import mindbadger.football.maintenance.model.seasondivision.SeasonDivision;
 import mindbadger.football.maintenance.model.seasondivision.SeasonDivisionsList;
 import mindbadger.football.maintenance.model.seasondivision.SingleSeasonDivision;
 import mindbadger.football.maintenance.model.seasondivisionteam.SeasonDivisionTeam;
+import mindbadger.football.maintenance.model.seasondivisionteam.SeasonDivisionTeamsList;
 import mindbadger.football.maintenance.model.seasondivisionteam.SingleSeasonDivisionTeam;
 import mindbadger.football.maintenance.model.team.SingleTeam;
 import mindbadger.football.maintenance.model.team.Team;
@@ -47,8 +48,13 @@ public class DataService {
         String url = dataApiTarget + "/seasons/" + seasonNumber + "/seasonDivisions";
         MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
 
-        GenericHttpGet<SeasonDivisionsList, SeasonDivision> get = new GenericHttpGet<SeasonDivisionsList, SeasonDivision>();
-        return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, SeasonDivisionsList.class);
+        HttpListWrapper<SeasonDivisionsList, SeasonDivision> get = new HttpListWrapper<SeasonDivisionsList, SeasonDivision>();
+        try {
+            return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, SeasonDivisionsList.class);
+        } catch (ClientProtocolException e) {
+            logger.error(e.getMessage());
+            return null;
+        }
     }
 
     public List<TrackedDivision> getTrackedDivisions () {
@@ -56,8 +62,13 @@ public class DataService {
         MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
         params.put("page[limit]", "10000");
 
-        GenericHttpGet<TrackedDivisionsList, TrackedDivision> get = new GenericHttpGet<TrackedDivisionsList, TrackedDivision>();
-        return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, TrackedDivisionsList.class);
+        HttpListWrapper<TrackedDivisionsList, TrackedDivision> get = new HttpListWrapper<TrackedDivisionsList, TrackedDivision>();
+        try {
+            return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, TrackedDivisionsList.class);
+        } catch (ClientProtocolException e) {
+            logger.error(e.getMessage());
+            return null;
+        }
     }
 
     public List<Mapping> getDivisionMappings () {
@@ -65,8 +76,13 @@ public class DataService {
         MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
         params.put("page[limit]", "10000");
 
-        GenericHttpGet<MappingsList, Mapping> get = new GenericHttpGet<MappingsList, Mapping>();
-        return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, MappingsList.class);
+        HttpListWrapper<MappingsList, Mapping> get = new HttpListWrapper<MappingsList, Mapping>();
+        try {
+            return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, MappingsList.class);
+        } catch (ClientProtocolException e) {
+            logger.error(e.getMessage());
+            return null;
+        }
     }
 
     public List<Mapping> getTeamMappings () {
@@ -74,8 +90,13 @@ public class DataService {
         MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
         params.put("page[limit]", "10000");
 
-        GenericHttpGet<MappingsList, Mapping> get = new GenericHttpGet<MappingsList, Mapping>();
-        return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, MappingsList.class);
+        HttpListWrapper<MappingsList, Mapping> get = new HttpListWrapper<MappingsList, Mapping>();
+        try {
+            return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, MappingsList.class);
+        } catch (ClientProtocolException e) {
+            logger.error(e.getMessage());
+            return null;
+        }
     }
 
     public List<Fixture> getUnplayedFixturesForDivisionBeforeToday (String seasonDivisionId) {
@@ -90,8 +111,13 @@ public class DataService {
         params.put("filter[fixtures][homeGoals][EQ]","null");
         params.put("filter[fixtureDate][LE]", dateString);
 
-        GenericHttpGet<FixturesList, Fixture> get = new GenericHttpGet<FixturesList, Fixture>();
-        return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
+        HttpListWrapper<FixturesList, Fixture> get = new HttpListWrapper<FixturesList, Fixture>();
+        try {
+            return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
+        } catch (ClientProtocolException e) {
+            logger.error(e.getMessage());
+            return null;
+        }
     }
 
     public List<Fixture> getAllFixturesForSeason (String seasonNumber) {
@@ -101,8 +127,13 @@ public class DataService {
         params.put("page[limit]", "10000");
         params.put("filter[seasonNumber][EQ]",seasonNumber);
 
-        GenericHttpGet<FixturesList, Fixture> get = new GenericHttpGet<FixturesList, Fixture>();
-        return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
+        HttpListWrapper<FixturesList, Fixture> get = new HttpListWrapper<FixturesList, Fixture>();
+        try {
+            return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
+        } catch (ClientProtocolException e) {
+            logger.error(e.getMessage());
+            return null;
+        }
     }
 
     private Fixture findExistingFixture (Fixture fixture) {
@@ -116,17 +147,15 @@ public class DataService {
         params.put("filter[homeTeamId][EQ]", fixture.getAttributes().getHomeTeamId());
         params.put("filter[awayTeamId][EQ]", fixture.getAttributes().getAwayTeamId());
 
-        String response = null;
+        HttpListWrapper<FixturesList, Fixture> get = new HttpListWrapper<FixturesList, Fixture>();
+        List<Fixture> fixtures = null;
         try {
-            response = serviceInvoker.get(url, ServiceInvoker.APPLICATION_VND_API_JSON, params);
-            Gson gson = new Gson();
-            FixturesList fixturesList = gson.fromJson(response, FixturesList.class);
-            List<Fixture> data = fixturesList.getData();
-            if (data.size() == 1)
-               return data.get(0);
+            fixtures = get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
+            if  (fixtures.size() == 1)
+                return fixtures.get(0);
             else
                 return fixture;
-        } catch (IOException | URISyntaxException e) {
+        } catch (ClientProtocolException e) {
             e.printStackTrace();
             return fixture;
         }
@@ -143,28 +172,16 @@ public class DataService {
         SingleFixture singleFixture = new SingleFixture();
         singleFixture.setData(fixture);
 
-        String payload = gson.toJson(singleFixture);
-        System.out.println("... payload: " + payload);
-
         String url = dataApiTarget + "/fixtures";
 
-        String response = null;
+        HttpSingleWrapper<SingleFixture, Fixture> save = new HttpSingleWrapper<SingleFixture, Fixture>();
+        SingleFixture savedFixture = null;
         try {
-            if (fixture.getId() == null) {
-                response = serviceInvoker.post(url, ServiceInvoker.APPLICATION_VND_API_JSON, payload);
-            } else {
-                url = url + "/" + fixture.getId();
-                response = serviceInvoker.patch(url, ServiceInvoker.APPLICATION_VND_API_JSON, payload);
-            }
-
-            System.out.println(".... Response from Save  = " + response);
-
-            singleFixture = gson.fromJson(response, SingleFixture.class);
-            return singleFixture.getData();
-        } catch (IOException e) {
-//            e.printStackTrace();
-            System.out.println(".... Unable to Save  = " + e.getMessage());
-            return null;
+            savedFixture = save.createOrUpdate(url, singleFixture, ServiceInvoker.APPLICATION_VND_API_JSON, SingleFixture.class);
+            return savedFixture.getData();
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -173,24 +190,19 @@ public class DataService {
         String findUrl = createUrl + "/" + seasonDivision.getAttributes().getSeasonNumber() + "_" +
                 seasonDivision.getAttributes().getDivisionId();
 
+        HttpSingleWrapper<SingleSeasonDivision, SeasonDivision> get = new HttpSingleWrapper<>();
         try {
-            String response = serviceInvoker.get(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON);
+            get.getSingle(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivision.class);
         } catch (ClientProtocolException e) {
             SingleSeasonDivision singleSeasonDivision = new SingleSeasonDivision();
             singleSeasonDivision.setData(seasonDivision);
 
-            Gson gson = new Gson();
-            String payload = gson.toJson(singleSeasonDivision);
-
+            HttpSingleWrapper<SingleSeasonDivision, SeasonDivision> save = new HttpSingleWrapper<SingleSeasonDivision, SeasonDivision>();
             try {
-                String response = serviceInvoker.post(createUrl, ServiceInvoker.APPLICATION_VND_API_JSON, payload);
-            } catch (IOException ex) {
+                SingleSeasonDivision savedFixture = save.createOrUpdate(createUrl, singleSeasonDivision, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivision.class);
+            } catch (ClientProtocolException ex) {
                 ex.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
         }
     }
 
@@ -200,32 +212,30 @@ public class DataService {
                 seasonDivisionTeam.getAttributes().getDivisionId() + "_" +
                 seasonDivisionTeam.getAttributes().getTeamId();
 
+        HttpSingleWrapper<SingleSeasonDivisionTeam, SeasonDivisionTeam> get = new HttpSingleWrapper<>();
         try {
-            String response = serviceInvoker.get(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON);
+            get.getSingle(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivisionTeam.class);
         } catch (ClientProtocolException e) {
             SingleSeasonDivisionTeam singleSeasonDivisionTeam = new SingleSeasonDivisionTeam();
             singleSeasonDivisionTeam.setData(seasonDivisionTeam);
 
-            Gson gson = new Gson();
-            String payload = gson.toJson(singleSeasonDivisionTeam);
-
+            HttpSingleWrapper<SingleSeasonDivisionTeam, SeasonDivisionTeam> save = new HttpSingleWrapper<>();
             try {
-                String response = serviceInvoker.post(createUrl, ServiceInvoker.APPLICATION_VND_API_JSON, payload);
-            } catch (IOException ex) {
+                SingleSeasonDivisionTeam savedFixture = save.createOrUpdate(createUrl, singleSeasonDivisionTeam, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivisionTeam.class);
+            } catch (ClientProtocolException ex) {
                 ex.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
         }
     }
 
-    public void createFixtureIfNotExists(String seasonNumber) {
-        String url = dataApiTarget + "/seasons/" + seasonNumber;
+    public void createSeasonIfNotExists(String seasonNumber) {
+        String createUrl = dataApiTarget + "/seasons";
+        String findUrl = createUrl + "/" + seasonNumber;
+
+        HttpSingleWrapper<SingleSeason, Season> get = new HttpSingleWrapper<>();
         try {
-            String response = serviceInvoker.get(url, ServiceInvoker.APPLICATION_VND_API_JSON);
-            System.out.println("Team " + seasonNumber + " already exists");
+            Season season = get.getSingle(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeason.class);
+            System.out.println("Season " + seasonNumber + " already exists");
         } catch (ClientProtocolException e) {
             System.out.println("Can't find season " + seasonNumber + ", so try to create it...");
             Season season = new Season();
@@ -234,20 +244,12 @@ public class DataService {
             SingleSeason singleSeason = new SingleSeason();
             singleSeason.setData(season);
 
-            Gson gson = new Gson();
-            String payload = gson.toJson(singleSeason);
-            System.out.println("... payload: " + payload);
-
+            HttpSingleWrapper<SingleSeason, Season> save = new HttpSingleWrapper<>();
             try {
-                url = dataApiTarget + "/seasons";
-                String response = serviceInvoker.post(url, ServiceInvoker.APPLICATION_VND_API_JSON, payload);
-            } catch (IOException ex) {
+                SingleSeason savedSeason = save.createOrUpdate(createUrl, singleSeason, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeason.class);
+            } catch (ClientProtocolException ex) {
                 ex.printStackTrace();
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
         }
     }
 
@@ -258,14 +260,12 @@ public class DataService {
         SingleTeam singleTeam = new SingleTeam();
         singleTeam.setData(team);
 
-        Gson gson = new Gson();
-        String payload = gson.toJson(singleTeam);
-
+        HttpSingleWrapper<SingleTeam, Team> save = new HttpSingleWrapper<>();
         try {
-            String response = serviceInvoker.post(url, ServiceInvoker.APPLICATION_VND_API_JSON, payload);
-            return gson.fromJson(response, Team.class);
-        } catch (IOException e) {
-            e.printStackTrace();
+            SingleTeam savedTeam = save.createOrUpdate(url, singleTeam, ServiceInvoker.APPLICATION_VND_API_JSON, SingleTeam.class);
+            return savedTeam.getData();
+        } catch (ClientProtocolException ex) {
+            ex.printStackTrace();
             return null;
         }
     }
@@ -278,14 +278,12 @@ public class DataService {
         SingleMapping singleMapping = new SingleMapping();
         singleMapping.setData(mapping);
 
-        Gson gson = new Gson();
-        String payload = gson.toJson(singleMapping);
-
+        HttpSingleWrapper<SingleMapping, Mapping> save = new HttpSingleWrapper<>();
         try {
-            String response = serviceInvoker.post(url, ServiceInvoker.APPLICATION_VND_API_JSON, payload);
-            return gson.fromJson(response, Mapping.class);
-        } catch (IOException e) {
-            e.printStackTrace();
+            SingleMapping savedMapping = save.createOrUpdate(url, singleMapping, ServiceInvoker.APPLICATION_VND_API_JSON, SingleMapping.class);
+            return savedMapping.getData();
+        } catch (ClientProtocolException ex) {
+            ex.printStackTrace();
             return null;
         }
     }
