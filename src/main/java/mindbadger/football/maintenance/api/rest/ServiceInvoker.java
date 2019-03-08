@@ -1,14 +1,9 @@
-package mindbadger.football.maintenance.api;
+package mindbadger.football.maintenance.api.rest;
 
 import org.apache.commons.collections4.MapIterator;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
@@ -17,16 +12,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.glassfish.jersey.client.ClientConfig;
-import org.glassfish.jersey.client.ClientProperties;
 import org.springframework.stereotype.Component;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;

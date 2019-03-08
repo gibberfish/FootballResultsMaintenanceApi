@@ -1,4 +1,4 @@
-package mindbadger.football.maintenance.api;
+package mindbadger.football.maintenance.api.rest;
 
 import com.google.gson.Gson;
 import mindbadger.football.maintenance.model.base.JsonApiBase;

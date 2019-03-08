@@ -1,11 +1,13 @@
 package mindbadger.football.maintenance.api.controller;
 
+import mindbadger.football.maintenance.api.dataservice.FixtureDataService;
+import mindbadger.football.maintenance.api.dataservice.MappingDataService;
+import mindbadger.football.maintenance.api.dataservice.SeasonDivisionTeamDataService;
 import mindbadger.football.maintenance.model.seasondivisionteam.SeasonDivisionTeam;
 import mindbadger.football.maintenance.model.team.Team;
 import mindbadger.football.maintenance.util.CurrentSeasonService;
-import mindbadger.football.maintenance.api.DataService;
 import mindbadger.football.maintenance.api.MappingCache;
-import mindbadger.football.maintenance.api.WebReaderService;
+import mindbadger.football.maintenance.api.webreader.WebReaderService;
 import mindbadger.football.maintenance.model.Fixture.Fixture;
 import mindbadger.football.maintenance.model.Fixture.SingleFixture;
 import mindbadger.football.maintenance.model.seasondivision.SeasonDivision;
@@ -26,7 +28,13 @@ import java.util.stream.Collectors;
 public class MaintenanceController {
 
     @Autowired
-    private DataService dataService;
+    private SeasonDivisionTeamDataService seasonDivisionTeamDataService;
+
+    @Autowired
+    private FixtureDataService fixtureDataService;
+
+    @Autowired
+    private MappingDataService mappingDataService;
 
     @Autowired
     private WebReaderService webReaderService;
@@ -93,13 +101,13 @@ public class MaintenanceController {
 //            }
 
             if (fixture.getAttributes().getAwayGoals() != null){
-                dataService.saveFixture(fixture);
+                fixtureDataService.saveFixture(fixture);
                 System.out.println("SAVING " + fixture);
             }
         }
 
 //        for (SingleFixture fixture : fixturesList) {
-//            Response response = dataService.saveFixture(fixture);
+//            Response response = seasonDivisionTeamDataService.saveFixture(fixture);
 //            if (response.getStatus() != 201) {
 //                System.out.println("Error saving fixture, status = " + response.getStatus());
 //            }
@@ -138,7 +146,7 @@ public class MaintenanceController {
 
         createSeasonIfNotExists (season);
 
-        List<Fixture> allCurrentFixturesForSeason = dataService.getAllFixturesForSeason(season);
+        List<Fixture> allCurrentFixturesForSeason = fixtureDataService.getAllFixturesForSeason(season);
         Map<String, Fixture> fixtureMap = new HashMap<>();
         for (Fixture fixture : allCurrentFixturesForSeason) {
             fixtureMap.put(fixture.getUniqueCompositeKey(), fixture);
@@ -195,18 +203,18 @@ public class MaintenanceController {
 
         System.out.println("We have the following divisions: ");
         for (Map.Entry<String, SeasonDivision> entry : seasonDivisionMap.entrySet()) {
-            dataService.createSeasonDivisionIfNotExists(entry.getValue());
+            seasonDivisionTeamDataService.createSeasonDivisionIfNotExists(entry.getValue());
         }
 
         System.out.println("We have the following teams: ");
         for (Map.Entry<String, SeasonDivisionTeam> entry : seasonDivisionTeamMap.entrySet()) {
-            dataService.createSeasonDivisionTeamIfNotExists(entry.getValue());
+            seasonDivisionTeamDataService.createSeasonDivisionTeamIfNotExists(entry.getValue());
         }
 
         System.out.println("We have the following " + fixtureMap.size() + "fixtures: ");
         for (Map.Entry<String, Fixture> entry : fixtureMap.entrySet()) {
             if (entry.getValue().isModified()) {
-                dataService.saveFixture(entry.getValue());
+                fixtureDataService.saveFixture(entry.getValue());
             }
         }
 
@@ -257,9 +265,9 @@ public class MaintenanceController {
         String teamId = mappingCache.getMappedTeams().get(webReaderTeamId);
         if (teamId == null) {
             System.out.println("We don't currently have team " + teamName + " ("+teamId+")");
-            Team team = dataService.createTeam(teamName);
+            Team team = seasonDivisionTeamDataService.createTeam(teamName);
             teamId = team.getId();
-            dataService.createTeamMapping (webReaderTeamId, teamId);
+            mappingDataService.createTeamMapping (webReaderTeamId, teamId);
             mappingCache.getMappedTeams().put(webReaderTeamId, teamId);
         }
         System.out.println("Our team ID is " + teamId);
@@ -277,9 +285,9 @@ public class MaintenanceController {
 
         Map<String,String> fixtureDates = new HashMap<>();
 
-        List<SeasonDivision> seasonDivisions = dataService.getSeasonDivisions(season);
+        List<SeasonDivision> seasonDivisions = seasonDivisionTeamDataService.getSeasonDivisions(season);
         seasonDivisions.forEach(seasonDivision -> {
-            List<Fixture> fixtures = dataService.getUnplayedFixturesForDivisionBeforeToday(seasonDivision.getId());
+            List<Fixture> fixtures = fixtureDataService.getUnplayedFixturesForDivisionBeforeToday(seasonDivision.getId());
 
             for (Fixture fixture : fixtures) {
                 String fixtureDate = fixture.getAttributes().getFixtureDate();
@@ -304,10 +312,10 @@ public class MaintenanceController {
 
         List<Fixture> fixtures = new ArrayList<>();
 
-        List<SeasonDivision> seasonDivisions = dataService.getSeasonDivisions(season);
+        List<SeasonDivision> seasonDivisions = seasonDivisionTeamDataService.getSeasonDivisions(season);
         seasonDivisions.forEach(seasonDivision -> {
             List<Fixture> fixturesForThisDivision =
-                    dataService.getUnplayedFixturesForDivisionBeforeToday(seasonDivision.getId());
+                    fixtureDataService.getUnplayedFixturesForDivisionBeforeToday(seasonDivision.getId());
             fixtures.addAll(fixturesForThisDivision);
         });
 
@@ -386,7 +394,7 @@ public class MaintenanceController {
     }
 
     private void createSeasonIfNotExists(String season) {
-        dataService.createSeasonIfNotExists(season);
+        seasonDivisionTeamDataService.createSeasonIfNotExists(season);
     }
 
 

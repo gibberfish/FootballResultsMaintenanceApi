@@ -1,4 +1,4 @@
-package mindbadger.football.maintenance.api;
+package mindbadger.football.maintenance.api.rest;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;

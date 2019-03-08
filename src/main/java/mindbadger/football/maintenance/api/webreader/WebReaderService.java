@@ -1,6 +1,9 @@
-package mindbadger.football.maintenance.api;
+package mindbadger.football.maintenance.api.webreader;
 
 import com.google.gson.Gson;
+import mindbadger.football.maintenance.api.MappingCache;
+import mindbadger.football.maintenance.api.dataservice.SeasonDivisionTeamDataService;
+import mindbadger.football.maintenance.api.rest.ServiceInvoker;
 import mindbadger.football.maintenance.model.webreaderfixture.WebReaderFixture;
 import mindbadger.football.maintenance.util.Pauser;
 import org.apache.commons.collections4.MultiValuedMap;
@@ -27,7 +30,7 @@ public class WebReaderService {
     private Pauser pauser;
 
     @Autowired
-    private DataService dataService;
+    private SeasonDivisionTeamDataService seasonDivisionTeamDataService;
 
     @Autowired
     private MappingCache mappingCache;

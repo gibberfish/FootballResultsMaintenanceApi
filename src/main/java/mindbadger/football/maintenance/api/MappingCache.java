@@ -1,5 +1,6 @@
 package mindbadger.football.maintenance.api;
 
+import mindbadger.football.maintenance.api.dataservice.MappingDataService;
 import mindbadger.football.maintenance.model.mapping.Mapping;
 import mindbadger.football.maintenance.model.trackeddivision.TrackedDivision;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,7 @@ import java.util.*;
 @Component
 public class MappingCache {
     @Autowired
-    private DataService dataService;
+    private MappingDataService mappingDataService;
 
     private List<Integer> trackedDivisions = new ArrayList<>();
     private Map<Integer, String> mappedDivisions = new HashMap<>();
@@ -19,17 +20,17 @@ public class MappingCache {
 
     @PostConstruct
     public void refreshCache() {
-        List<TrackedDivision> trackedDivisions = dataService.getTrackedDivisions();
+        List<TrackedDivision> trackedDivisions = mappingDataService.getTrackedDivisions();
         for (TrackedDivision trackedDivision : trackedDivisions) {
             this.trackedDivisions.add(trackedDivision.getAttributes().getSourceId());
         }
 
-        List<Mapping> divisionMappings = dataService.getDivisionMappings();
+        List<Mapping> divisionMappings = mappingDataService.getDivisionMappings();
         for (Mapping mapping : divisionMappings) {
             this.mappedDivisions.put(mapping.getAttributes().getSourceId(), mapping.getAttributes().getFraId());
         }
 
-        List<Mapping> teamMappings = dataService.getTeamMappings();
+        List<Mapping> teamMappings = mappingDataService.getTeamMappings();
         for (Mapping mapping : teamMappings) {
             this.mappedTeams.put(mapping.getAttributes().getSourceId(), mapping.getAttributes().getFraId());
         }
