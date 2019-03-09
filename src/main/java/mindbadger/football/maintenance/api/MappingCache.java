@@ -3,6 +3,7 @@ package mindbadger.football.maintenance.api;
 import mindbadger.football.maintenance.api.dataservice.MappingDataService;
 import mindbadger.football.maintenance.model.mapping.Mapping;
 import mindbadger.football.maintenance.model.trackeddivision.TrackedDivision;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,6 +12,8 @@ import java.util.*;
 
 @Component
 public class MappingCache {
+    Logger logger = Logger.getLogger(MappingCache.class);
+
     @Autowired
     private MappingDataService mappingDataService;
 
@@ -35,14 +38,12 @@ public class MappingCache {
             this.mappedTeams.put(mapping.getAttributes().getSourceId(), mapping.getAttributes().getFraId());
         }
 
-
-
         mappedDivisions.forEach((k,v) -> {
-            System.out.println(String.format("*********** MAPPED DIV: %s = %s", k, v));
+            logger.debug(String.format("*********** MAPPED DIV: %s = %s", k, v));
         });
 
         mappedTeams.forEach((k,v) -> {
-            System.out.println(String.format("*********** MAPPED TEAM: %s = %s", k, v));
+            logger.debug(String.format("*********** MAPPED TEAM: %s = %s", k, v));
         });
 
 

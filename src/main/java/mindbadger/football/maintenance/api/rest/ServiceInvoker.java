@@ -12,6 +12,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -21,6 +22,8 @@ import java.util.List;
 
 @Component("serviceInvoker")
 public class ServiceInvoker {
+    private Logger logger = Logger.getLogger(ServiceInvoker.class);
+
 
     public static final String APPLICATION_VND_API_JSON = "application/vnd.api+json";
 
@@ -32,7 +35,7 @@ public class ServiceInvoker {
 //
 //        try {
 //            String response = si.get("http://localhost:1972/dataapi/seasonDivisions/2017_2/fixtures", ServiceInvoker.APPLICATION_VND_API_JSON, params);
-//            System.out.println("GET: " + response);
+//            logger.debug("GET: " + response);
 //
 //            final String payload = "{\n" +
 //                    "    \"data\": {\n" +
@@ -51,7 +54,7 @@ public class ServiceInvoker {
 //                    "}";
 //
 //            response = si.patch("http://localhost:1972/dataapi/fixtures/409548", ServiceInvoker.APPLICATION_VND_API_JSON, payload);
-//            System.out.println("PATCH: " + response);
+//            logger.debug("PATCH: " + response);
 //        } catch (URISyntaxException e) {
 //            e.printStackTrace();
 //        } catch (IOException e) {
@@ -67,7 +70,7 @@ public class ServiceInvoker {
     public String get (String uri, String mediaType, MultiValuedMap<String, String> parameters)
             throws URISyntaxException, IOException {
 
-        System.out.println("Execute get on " + uri + ", " + mediaType + ", with");
+        logger.debug("Execute get on " + uri + ", " + mediaType + ", with");
 
         int timeout = 60;
         RequestConfig config = RequestConfig.custom()
@@ -91,7 +94,7 @@ public class ServiceInvoker {
             HttpGet httpget = new HttpGet(builder.build());
             httpget.setHeader("Content-type", mediaType);
 
-            System.out.println("... ABOUT TO EXECUTE : " + httpget);
+            logger.debug("... ABOUT TO EXECUTE : " + httpget);
 
             return httpclient.execute(httpget, new GetResponseHandler());
         } finally {
@@ -143,8 +146,8 @@ public class ServiceInvoker {
 //        configuration = configuration.property(ClientProperties.READ_TIMEOUT, 60000);
 //        Client client = ClientBuilder.newClient(configuration);
 //
-//        System.out.println("apiTarget = " + apiTarget);
-//        System.out.println("mediaType = " + mediaType);
+//        logger.debug("apiTarget = " + apiTarget);
+//        logger.debug("mediaType = " + mediaType);
 //
 //        WebTarget webTarget
 //                = client.target(apiTarget);
@@ -159,7 +162,7 @@ public class ServiceInvoker {
 //            getDivisionsTarget = getDivisionsTarget.queryParam(key, value);
 //        }
 //
-//        System.out.println(getDivisionsTarget.toString());
+//        logger.debug(getDivisionsTarget.toString());
 //
 //        return getDivisionsTarget.
 //                request(mediaType).get();
@@ -189,7 +192,7 @@ public class ServiceInvoker {
 //
 //
 //        String url = apiTarget + "/" + targetType + "/" + id;
-//        System.out.println("URL = " + url);
+//        logger.debug("URL = " + url);
 //        HttpUriRequest req = new HttpPatch(url);
 //        req.setHeader("Content-type", ServiceInvoker.APPLICATION_VND_API_JSON);
 //
@@ -200,7 +203,7 @@ public class ServiceInvoker {
 //
 //            HttpResponse httpResponse = httpclient.execute(req);
 //
-//            System.out.println("Status code : " + httpResponse.getStatusLine().getStatusCode());
+//            logger.debug("Status code : " + httpResponse.getStatusLine().getStatusCode());
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }

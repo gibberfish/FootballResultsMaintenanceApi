@@ -8,6 +8,7 @@ import mindbadger.football.maintenance.model.webreaderfixture.WebReaderFixture;
 import mindbadger.football.maintenance.util.Pauser;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -20,6 +21,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class WebReaderService {
+    Logger logger = Logger.getLogger(WebReaderService.class);
+
     @Value("${webreader.api.target}")
     private String webReaderApiTarget;
 
@@ -60,7 +63,7 @@ public class WebReaderService {
         try {
             response = serviceInvoker.get(url, MediaType.APPLICATION_JSON, params);
 
-            System.out.println("RESPONSE FROM get = " + response);
+            logger.debug("RESPONSE FROM get = " + response);
 
             Gson gson = new Gson();
             WebReaderFixture[] fixtures = gson.fromJson(response, WebReaderFixture[].class);
@@ -68,7 +71,7 @@ public class WebReaderService {
         } catch (IOException | URISyntaxException e) {
             if (retryCount < 5) {
                 retryCount++;
-                System.out.println("... retrying ...");
+                logger.debug("... retrying ...");
                 return getFixturesForTeam(seasonNumber, teamId, retryCount);
             }
             System.err.println("Failed to get fixtures from the web for season " + seasonNumber + " and team " + teamId);
@@ -92,7 +95,7 @@ public class WebReaderService {
         try {
             response = serviceInvoker.get(url, MediaType.APPLICATION_JSON, params);
 
-            System.out.println("RESPONSE FROM get = " + response);
+            logger.debug("RESPONSE FROM get = " + response);
 
             Gson gson = new Gson();
             WebReaderFixture[] fixtures = gson.fromJson(response, WebReaderFixture[].class);
@@ -100,7 +103,7 @@ public class WebReaderService {
         } catch (IOException | URISyntaxException e) {
             if (retryCount < 5) {
                 retryCount++;
-                System.out.println("... retrying ...");
+                logger.debug("... retrying ...");
                 return getFixturesForDate(fixtureDate, retryCount);
             }
             System.err.println("Failed to get fixtures from the web for " + fixtureDate);

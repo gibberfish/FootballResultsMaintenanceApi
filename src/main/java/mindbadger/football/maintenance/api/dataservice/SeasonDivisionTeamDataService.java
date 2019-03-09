@@ -106,9 +106,9 @@ public class SeasonDivisionTeamDataService {
         HttpSingleWrapper<SingleSeason, Season> get = new HttpSingleWrapper<>();
         try {
             Season season = get.getSingle(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeason.class);
-            System.out.println("Season " + seasonNumber + " already exists");
+            logger.debug("Season " + seasonNumber + " already exists");
         } catch (ClientProtocolException e) {
-            System.out.println("Can't find season " + seasonNumber + ", so try to create it...");
+            logger.debug("Can't find season " + seasonNumber + ", so try to create it...");
             Season season = new Season();
             season.setId(seasonNumber);
             season.getAttributes().setSeasonNumber(Integer.parseInt(seasonNumber));
