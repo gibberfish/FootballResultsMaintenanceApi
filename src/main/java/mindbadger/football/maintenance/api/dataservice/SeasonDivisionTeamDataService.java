@@ -1,15 +1,8 @@
 package mindbadger.football.maintenance.api.dataservice;
 
-import com.google.gson.Gson;
 import mindbadger.football.maintenance.api.rest.HttpListWrapper;
 import mindbadger.football.maintenance.api.rest.HttpSingleWrapper;
 import mindbadger.football.maintenance.api.rest.ServiceInvoker;
-import mindbadger.football.maintenance.model.Fixture.Fixture;
-import mindbadger.football.maintenance.model.Fixture.FixturesList;
-import mindbadger.football.maintenance.model.Fixture.SingleFixture;
-import mindbadger.football.maintenance.model.mapping.Mapping;
-import mindbadger.football.maintenance.model.mapping.MappingsList;
-import mindbadger.football.maintenance.model.mapping.SingleMapping;
 import mindbadger.football.maintenance.model.season.Season;
 import mindbadger.football.maintenance.model.season.SingleSeason;
 import mindbadger.football.maintenance.model.seasondivision.SeasonDivision;
@@ -19,8 +12,6 @@ import mindbadger.football.maintenance.model.seasondivisionteam.SeasonDivisionTe
 import mindbadger.football.maintenance.model.seasondivisionteam.SingleSeasonDivisionTeam;
 import mindbadger.football.maintenance.model.team.SingleTeam;
 import mindbadger.football.maintenance.model.team.Team;
-import mindbadger.football.maintenance.model.trackeddivision.TrackedDivision;
-import mindbadger.football.maintenance.model.trackeddivision.TrackedDivisionsList;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
 import org.apache.http.client.ClientProtocolException;
@@ -29,9 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.List;
 
 @Component
 public class SeasonDivisionTeamDataService {
@@ -56,71 +45,95 @@ public class SeasonDivisionTeamDataService {
         }
     }
 
-    public void createSeasonDivisionIfNotExists(SeasonDivision seasonDivision) {
-        String createUrl = dataApiTarget + "/seasonDivisions";
-        String findUrl = createUrl + "/" + seasonDivision.getAttributes().getSeasonNumber() + "_" +
-                seasonDivision.getAttributes().getDivisionId();
+    public SeasonDivision getSeasonDivision(SeasonDivision seasonDivisionId) {
+        String findUrl = dataApiTarget + "/seasonDivisions" + "/" +
+                seasonDivisionId.getAttributes().getSeasonNumber() + "_" +
+                seasonDivisionId.getAttributes().getDivisionId();
 
         HttpSingleWrapper<SingleSeasonDivision, SeasonDivision> get = new HttpSingleWrapper<>();
         try {
-            get.getSingle(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivision.class);
+            SeasonDivision seasonDivision = get.getSingle(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivision.class);
+            return seasonDivision;
         } catch (ClientProtocolException e) {
-            SingleSeasonDivision singleSeasonDivision = new SingleSeasonDivision();
-            singleSeasonDivision.setData(seasonDivision);
-
-            HttpSingleWrapper<SingleSeasonDivision, SeasonDivision> save = new HttpSingleWrapper<SingleSeasonDivision, SeasonDivision>();
-            try {
-                SingleSeasonDivision savedFixture = save.createOrUpdate(createUrl, singleSeasonDivision, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivision.class);
-            } catch (ClientProtocolException ex) {
-                ex.printStackTrace();
-            }
+            logger.debug("Can't find Season Division " + seasonDivisionId);
+            logger.debug(e);
+            return null;
         }
     }
 
-    public void createSeasonDivisionTeamIfNotExists(SeasonDivisionTeam seasonDivisionTeam) {
-        String createUrl = dataApiTarget + "/seasonDivisionTeams";
-        String findUrl = createUrl + "/" + seasonDivisionTeam.getAttributes().getSeasonNumber() + "_" +
-                seasonDivisionTeam.getAttributes().getDivisionId() + "_" +
-                seasonDivisionTeam.getAttributes().getTeamId();
+    public void createSeasonDivision(SeasonDivision seasonDivisionId) {
+        String createUrl = dataApiTarget + "/seasonDivisions";
+
+        SingleSeasonDivision singleSeasonDivision = new SingleSeasonDivision();
+        singleSeasonDivision.setData(seasonDivisionId);
+
+        HttpSingleWrapper<SingleSeasonDivision, SeasonDivision> save = new HttpSingleWrapper<SingleSeasonDivision, SeasonDivision>();
+        try {
+            SingleSeasonDivision seasonDivision = save.createOrUpdate(createUrl, singleSeasonDivision, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivision.class);
+        } catch (ClientProtocolException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public SeasonDivisionTeam getSeasonDivisionTeam(SeasonDivisionTeam seasonDivisionTeamId) {
+        String findUrl = dataApiTarget + "/seasonDivisionTeams" + "/" +
+                seasonDivisionTeamId.getAttributes().getSeasonNumber() + "_" +
+                seasonDivisionTeamId.getAttributes().getDivisionId() + "_" +
+                seasonDivisionTeamId.getAttributes().getTeamId();
 
         HttpSingleWrapper<SingleSeasonDivisionTeam, SeasonDivisionTeam> get = new HttpSingleWrapper<>();
         try {
-            get.getSingle(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivisionTeam.class);
+            SeasonDivisionTeam seasonDivisionTeam = get.getSingle(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivisionTeam.class);
+            return seasonDivisionTeam;
         } catch (ClientProtocolException e) {
-            SingleSeasonDivisionTeam singleSeasonDivisionTeam = new SingleSeasonDivisionTeam();
-            singleSeasonDivisionTeam.setData(seasonDivisionTeam);
-
-            HttpSingleWrapper<SingleSeasonDivisionTeam, SeasonDivisionTeam> save = new HttpSingleWrapper<>();
-            try {
-                SingleSeasonDivisionTeam savedFixture = save.createOrUpdate(createUrl, singleSeasonDivisionTeam, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivisionTeam.class);
-            } catch (ClientProtocolException ex) {
-                ex.printStackTrace();
-            }
+            logger.debug("Can't find Season Division Team " + seasonDivisionTeamId);
+            logger.debug(e);
+            return null;
         }
     }
 
-    public void createSeasonIfNotExists(String seasonNumber) {
+    public void createSeasonDivisionTeam(SeasonDivisionTeam seasonDivisionTeam) {
+        String createUrl = dataApiTarget + "/seasonDivisionTeams";
+        SingleSeasonDivisionTeam singleSeasonDivisionTeam = new SingleSeasonDivisionTeam();
+        singleSeasonDivisionTeam.setData(seasonDivisionTeam);
+
+        HttpSingleWrapper<SingleSeasonDivisionTeam, SeasonDivisionTeam> save = new HttpSingleWrapper<>();
+        try {
+            SingleSeasonDivisionTeam savedFixture = save.createOrUpdate(createUrl, singleSeasonDivisionTeam, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivisionTeam.class);
+        } catch (ClientProtocolException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void createSeason (String seasonNumber) {
         String createUrl = dataApiTarget + "/seasons";
-        String findUrl = createUrl + "/" + seasonNumber;
+
+        Season season = new Season();
+        season.setId(seasonNumber);
+        season.getAttributes().setSeasonNumber(Integer.parseInt(seasonNumber));
+        SingleSeason singleSeason = new SingleSeason();
+        singleSeason.setData(season);
+
+        HttpSingleWrapper<SingleSeason, Season> save = new HttpSingleWrapper<>();
+        try {
+            SingleSeason savedSeason = save.createOrUpdate(createUrl, singleSeason, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeason.class);
+        } catch (ClientProtocolException ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public Season getSeason (String seasonNumber) {
+        String findUrl = dataApiTarget + "/seasons/" + seasonNumber;
 
         HttpSingleWrapper<SingleSeason, Season> get = new HttpSingleWrapper<>();
         try {
             Season season = get.getSingle(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeason.class);
             logger.debug("Season " + seasonNumber + " already exists");
+            return season;
         } catch (ClientProtocolException e) {
-            logger.debug("Can't find season " + seasonNumber + ", so try to create it...");
-            Season season = new Season();
-            season.setId(seasonNumber);
-            season.getAttributes().setSeasonNumber(Integer.parseInt(seasonNumber));
-            SingleSeason singleSeason = new SingleSeason();
-            singleSeason.setData(season);
-
-            HttpSingleWrapper<SingleSeason, Season> save = new HttpSingleWrapper<>();
-            try {
-                SingleSeason savedSeason = save.createOrUpdate(createUrl, singleSeason, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeason.class);
-            } catch (ClientProtocolException ex) {
-                ex.printStackTrace();
-            }
+            logger.debug("Can't find season " + seasonNumber);
+            logger.debug(e.getMessage());
+            return null;
         }
     }
 

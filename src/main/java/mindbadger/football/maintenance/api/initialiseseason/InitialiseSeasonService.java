@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +40,6 @@ public class InitialiseSeasonService {
     private MappingCache mappingCache;
 
     public void initialiseSeason (String season) {
-        Map<Integer, String> otherTeams = new HashMap<>();
         Map<String, SeasonDivisionTeam> seasonDivisionTeamMap = new HashMap<>();
         Map<String, SeasonDivision> seasonDivisionMap = new HashMap<>();
 
@@ -47,9 +47,79 @@ public class InitialiseSeasonService {
 
         Map<String, Fixture> fixtureMap = getAllFixturesForSeason(season);
 
-        Map<Integer, String> teamsOnBoxingDay = getTeamsPlayingOnBoxingDay(season);
+        Map<Integer, String> teamsToLoadFixtures = getTeamsPlayingOnBoxingDay(season);
 
-        for (Map.Entry<Integer, String> entry : teamsOnBoxingDay.entrySet()) {
+        int counter = 0;
+        while (counter < 3 && teamsToLoadFixtures.size() > 0) {
+            teamsToLoadFixtures = readFixturesForTeams(season, teamsToLoadFixtures, fixtureMap, seasonDivisionTeamMap, seasonDivisionMap);
+            counter++;
+        }
+
+        logger.debug("We have the following " + seasonDivisionMap.size() + " divisions: ");
+        for (Map.Entry<String, SeasonDivision> entry : seasonDivisionMap.entrySet()) {
+            if (seasonDivisionTeamDataService.getSeasonDivision(entry.getValue()) == null) {
+                seasonDivisionTeamDataService.createSeasonDivision(entry.getValue());
+            };
+        }
+
+        logger.debug("We have the following " + seasonDivisionTeamMap.size() + " teams: ");
+        for (Map.Entry<String, SeasonDivisionTeam> entry : seasonDivisionTeamMap.entrySet()) {
+            if (seasonDivisionTeamDataService.getSeasonDivisionTeam(entry.getValue()) == null) {
+                seasonDivisionTeamDataService.createSeasonDivisionTeam(entry.getValue());
+            }
+        }
+
+        addMissingFixtures(season, seasonDivisionTeamMap, fixtureMap);
+
+        logger.debug("We have the following " + fixtureMap.size() + " fixtures: ");
+        for (Map.Entry<String, Fixture> entry : fixtureMap.entrySet()) {
+            if (entry.getValue().isModified()) {
+                fixtureDataService.saveFixture(entry.getValue());
+            }
+        }
+    }
+
+    private void addMissingFixtures (String season, Map<String, SeasonDivisionTeam> seasonDivisionTeamMap, Map<String, Fixture> fixtureMap) {
+        Map<String, List<String>> divisions = new HashMap<>();
+
+        for (Map.Entry<String, SeasonDivisionTeam> entry : seasonDivisionTeamMap.entrySet()) {
+            String teamId = entry.getValue().getAttributes().getTeamId();
+            String divId = entry.getValue().getAttributes().getDivisionId();
+
+            List<String> divisionTeamList = divisions.get(divId);
+
+            if (divisionTeamList == null) {
+                divisionTeamList = new ArrayList<>();
+                divisions.put(divId, divisionTeamList);
+            }
+
+            divisionTeamList.add(teamId);
+        }
+
+        for (Map.Entry<String, List<String>> entry : divisions.entrySet()) {
+            String divId = entry.getKey();
+            for (String homeTeamId : entry.getValue()) {
+                for (String awayTeamId : entry.getValue()) {
+                    if (!homeTeamId.equals(awayTeamId)) {
+                        String key = season + "_" + divId + "_" + homeTeamId + "_" + awayTeamId;
+                        if (fixtureMap.get(key) == null) {
+                            Fixture fixture = new Fixture();
+                            fixture.getAttributes().setSeasonNumber(Integer.parseInt(season));
+                            fixture.getAttributes().setDivisionId(divId);
+                            fixture.getAttributes().setHomeTeamId(homeTeamId);
+                            fixture.getAttributes().setAwayTeamId(awayTeamId);
+                            logger.info("Fixture missing,so adding : " + fixtureMap);
+                            fixtureMap.put(key, fixture);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private Map<Integer, String> readFixturesForTeams (String season, Map<Integer, String> teams, Map<String, Fixture> fixtureMap, Map<String, SeasonDivisionTeam> seasonDivisionTeamMap, Map<String, SeasonDivision> seasonDivisionMap) {
+        Map<Integer, String> teamsToLoadInAnotherIteration = new HashMap<>();
+        for (Map.Entry<Integer, String> entry : teams.entrySet()) {
 
             String teamIdToUseToLoadFixtures = getTeamIdForWebReaderTeamAndCreateIfNotExists(entry.getKey(), entry.getValue());
 
@@ -57,50 +127,18 @@ public class InitialiseSeasonService {
 
             if (fixturesForTeam == null) {
                 logger.error("Failed to get fixtures for team for " + teamIdToUseToLoadFixtures + " ... adding to second list to reload later");
-                otherTeams.put(entry.getKey(), entry.getValue());
+                teamsToLoadInAnotherIteration.put(entry.getKey(), entry.getValue());
                 continue;
             }
 
-            for (WebReaderFixture webReaderFixture2 : fixturesForTeam) {
-                otherTeams.put(webReaderFixture2.getHomeTeamId(), webReaderFixture2.getHomeTeamName());
-                otherTeams.put(webReaderFixture2.getAwayTeamId(), webReaderFixture2.getAwayTeamName());
+            for (WebReaderFixture webReaderFixture : fixturesForTeam) {
+                teamsToLoadInAnotherIteration.put(webReaderFixture.getHomeTeamId(), webReaderFixture.getHomeTeamName());
+                teamsToLoadInAnotherIteration.put(webReaderFixture.getAwayTeamId(), webReaderFixture.getAwayTeamName());
 
-                processWebReaderFixture(season, fixtureMap, seasonDivisionTeamMap, seasonDivisionMap, webReaderFixture2);
+                processWebReaderFixture(season, fixtureMap, seasonDivisionTeamMap, seasonDivisionMap, webReaderFixture);
             }
         }
-
-        for (Map.Entry<Integer, String> entry : otherTeams.entrySet()) {
-
-            String teamIdToUseToLoadFixtures = getTeamIdForWebReaderTeamAndCreateIfNotExists(entry.getKey(), entry.getValue());
-
-            List<WebReaderFixture> fixturesForTeam = webReaderService.getFixturesForTeam(season, entry.getKey().toString());
-
-            if (fixturesForTeam == null) {
-                logger.error("Failed to get fixtures for team for " + teamIdToUseToLoadFixtures + " ... skipping");
-                continue;
-            }
-
-            for (WebReaderFixture webReaderFixture2 : fixturesForTeam) {
-                processWebReaderFixture(season, fixtureMap, seasonDivisionTeamMap, seasonDivisionMap, webReaderFixture2);
-            }
-        }
-
-        logger.debug("We have the following divisions: ");
-        for (Map.Entry<String, SeasonDivision> entry : seasonDivisionMap.entrySet()) {
-            seasonDivisionTeamDataService.createSeasonDivisionIfNotExists(entry.getValue());
-        }
-
-        logger.debug("We have the following teams: ");
-        for (Map.Entry<String, SeasonDivisionTeam> entry : seasonDivisionTeamMap.entrySet()) {
-            seasonDivisionTeamDataService.createSeasonDivisionTeamIfNotExists(entry.getValue());
-        }
-
-        logger.debug("We have the following " + fixtureMap.size() + "fixtures: ");
-        for (Map.Entry<String, Fixture> entry : fixtureMap.entrySet()) {
-            if (entry.getValue().isModified()) {
-                fixtureDataService.saveFixture(entry.getValue());
-            }
-        }
+        return teamsToLoadInAnotherIteration;
     }
 
     private Map<String, Fixture> getAllFixturesForSeason (String season) {
@@ -165,7 +203,10 @@ public class InitialiseSeasonService {
     }
 
     private void createSeasonIfNotExists(String season) {
-        seasonDivisionTeamDataService.createSeasonIfNotExists(season);
+        if (seasonDivisionTeamDataService.getSeason(season) == null) {
+            logger.info("Season " + season + " doesn't exist, so creating it...");
+            seasonDivisionTeamDataService.createSeason(season);
+        }
     }
 
     private Map<Integer, String> getTeamsPlayingOnBoxingDay(String season) {
@@ -179,11 +220,11 @@ public class InitialiseSeasonService {
             teamsOnBoxingDay.put(webReaderFixture.getAwayTeamId(), webReaderFixture.getAwayTeamName());
         }
 
+        logger.debug("Loaded " + teamsOnBoxingDay.size() + " teams from date " + boxingDayFixtureDate);
         return teamsOnBoxingDay;
     }
 
     private String getTeamIdForWebReaderTeamAndCreateIfNotExists (Integer webReaderTeamId, String teamName) {
-        logger.debug("Find our team ID for web reader team id " + webReaderTeamId);
         String teamId = mappingCache.getMappedTeams().get(webReaderTeamId);
         if (teamId == null) {
             logger.debug("We don't currently have team " + teamName + " ("+teamId+")");
@@ -192,7 +233,7 @@ public class InitialiseSeasonService {
             mappingDataService.createTeamMapping (webReaderTeamId, teamId);
             mappingCache.getMappedTeams().put(webReaderTeamId, teamId);
         }
-        logger.debug("Our team ID is " + teamId);
+        logger.debug("Our team ID for web reader id " + webReaderTeamId + " is " + teamId);
         return  teamId;
     }
 
