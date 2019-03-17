@@ -107,7 +107,7 @@ public class FixtureDataService {
 
     public Fixture saveFixture (Fixture fixture) {
         logger.debug("About to save " + fixture);
-        Gson gson = new Gson();
+//        Gson gson = new Gson();
 
         if (fixture.getId() == null) {
             fixture = findExistingFixture(fixture);
@@ -126,6 +126,23 @@ public class FixtureDataService {
         } catch (ClientProtocolException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
+        }
+    }
+
+    //TODO change void to returned values
+    public void saveFixtures (List<Fixture> fixtures) {
+        logger.debug("About to save " + fixtures.size() + " fixtures");
+
+        String url = dataApiTarget + "/bulksave/fixtures";
+
+        FixturesList fixturesList = new FixturesList();
+        fixturesList.setData(fixtures);
+
+        HttpListWrapper<FixturesList, Fixture> put = new HttpListWrapper<FixturesList, Fixture>();
+        try {
+            put.saveList(url, fixturesList, ServiceInvoker.APPLICATION_VND_API_JSON, FixturesList.class);
+        } catch (ClientProtocolException e) {
+            e.printStackTrace();
         }
     }
 }

@@ -72,11 +72,13 @@ public class InitialiseSeasonService {
         addMissingFixtures(season, seasonDivisionTeamMap, fixtureMap);
 
         logger.debug("We have the following " + fixtureMap.size() + " fixtures: ");
-        for (Map.Entry<String, Fixture> entry : fixtureMap.entrySet()) {
-            if (entry.getValue().isModified()) {
-                fixtureDataService.saveFixture(entry.getValue());
-            }
-        }
+        fixtureDataService.saveFixtures(new ArrayList<Fixture>(fixtureMap.values()));
+
+//        for (Map.Entry<String, Fixture> entry : fixtureMap.entrySet()) {
+//            if (entry.getValue().isModified()) {
+//                fixtureDataService.saveFixture(entry.getValue());
+//            }
+//        }
     }
 
     private void addMissingFixtures (String season, Map<String, SeasonDivisionTeam> seasonDivisionTeamMap, Map<String, Fixture> fixtureMap) {
@@ -118,6 +120,13 @@ public class InitialiseSeasonService {
     }
 
     private Map<Integer, String> readFixturesForTeams (String season, Map<Integer, String> teams, Map<String, Fixture> fixtureMap, Map<String, SeasonDivisionTeam> seasonDivisionTeamMap, Map<String, SeasonDivision> seasonDivisionMap) {
+        logger.debug("****** readFixturesForTeams ******");
+        logger.debug("   Season = " + season);
+        logger.debug("   Teams = " + teams.size());
+        logger.debug("   Fixture Map = " + fixtureMap.size());
+        logger.debug("   Season Division Team Map = " + seasonDivisionTeamMap.size());
+        logger.debug("   Season Division Map = " + seasonDivisionMap.size());
+
         Map<Integer, String> teamsToLoadInAnotherIteration = new HashMap<>();
         for (Map.Entry<Integer, String> entry : teams.entrySet()) {
 
@@ -131,13 +140,25 @@ public class InitialiseSeasonService {
                 continue;
             }
 
+            logger.debug("   Read " + fixturesForTeam.size() + " fixtures for team " + teamIdToUseToLoadFixtures);
+
             for (WebReaderFixture webReaderFixture : fixturesForTeam) {
-                teamsToLoadInAnotherIteration.put(webReaderFixture.getHomeTeamId(), webReaderFixture.getHomeTeamName());
-                teamsToLoadInAnotherIteration.put(webReaderFixture.getAwayTeamId(), webReaderFixture.getAwayTeamName());
+                if (teams.get(webReaderFixture.getHomeTeamId()) == null) {
+                    teamsToLoadInAnotherIteration.put(webReaderFixture.getHomeTeamId(), webReaderFixture.getHomeTeamName());
+                }
+                if (teams.get(webReaderFixture.getAwayTeamId()) == null) {
+                    teamsToLoadInAnotherIteration.put(webReaderFixture.getAwayTeamId(), webReaderFixture.getAwayTeamName());
+                }
 
                 processWebReaderFixture(season, fixtureMap, seasonDivisionTeamMap, seasonDivisionMap, webReaderFixture);
             }
         }
+
+        logger.debug("   Fixture Map (afterwards) = " + fixtureMap.size());
+        logger.debug("   Season Division Team Map (afterwards) = " + seasonDivisionTeamMap.size());
+        logger.debug("   Season Division Map (afterwards) = " + seasonDivisionMap.size());
+
+        logger.debug("   Got another " + teamsToLoadInAnotherIteration.size() + " teams to load in another iteration");
         return teamsToLoadInAnotherIteration;
     }
 
