@@ -134,6 +134,21 @@ public class ServiceInvoker {
         }
     }
 
+    public String put (String url, String mediaType, String payload) throws IOException {
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        try {
+            HttpPut httpPut = new HttpPut(url);
+            httpPut.setHeader("Content-type", mediaType);
+
+            final StringEntity stringData = new StringEntity(payload);
+
+            httpPut.setEntity(stringData);
+
+            return httpclient.execute(httpPut, new GetResponseHandler());
+        } finally {
+            httpclient.close();
+        }
+    }
 
 //    public Response callApiGet (String apiTarget, String targetType, String mediaType) {
 //        MultiValuedMap<String, String> parameters = new HashSetValuedHashMap<>();

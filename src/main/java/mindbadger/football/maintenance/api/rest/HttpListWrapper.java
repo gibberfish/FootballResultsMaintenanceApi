@@ -43,4 +43,19 @@ public class HttpListWrapper<L extends JsonApiList, C extends JsonApiBase> {
             throw new RuntimeException(e);
         }
     }
+
+    public void saveList (String url, L listOfObjectsToSave, String mediaType, Class<L> type) throws ClientProtocolException {
+        Gson gson = new Gson();
+        String payload = gson.toJson(listOfObjectsToSave);
+
+        String response = null;
+        try {
+            response = serviceInvoker.put(url, ServiceInvoker.APPLICATION_VND_API_JSON, payload);
+        } catch (ClientProtocolException e) {
+            throw e;
+        } catch (IOException e) {
+            logger.error("URISyntaxException executing saveList: " + e.getMessage());
+            throw new RuntimeException(e);
+        }
+    }
 }
