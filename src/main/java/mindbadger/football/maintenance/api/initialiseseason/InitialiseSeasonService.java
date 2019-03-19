@@ -103,7 +103,7 @@ public class InitialiseSeasonService {
             for (String homeTeamId : entry.getValue()) {
                 for (String awayTeamId : entry.getValue()) {
                     if (!homeTeamId.equals(awayTeamId)) {
-                        String key = season + "_" + divId + "_" + homeTeamId + "_" + awayTeamId;
+                        String key = season + "-" + divId + "-" + homeTeamId + "-" + awayTeamId;
                         if (fixtureMap.get(key) == null) {
                             Fixture fixture = new Fixture();
                             fixture.getAttributes().setSeasonNumber(Integer.parseInt(season));
