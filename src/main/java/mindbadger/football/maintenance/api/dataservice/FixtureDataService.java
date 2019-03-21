@@ -106,7 +106,7 @@ public class FixtureDataService {
     }
 
     public Fixture saveFixture (Fixture fixture) {
-        logger.debug("About to save " + fixture);
+        logger.debug("About to save " + fixture.getUniqueCompositeKey());
 //        Gson gson = new Gson();
 
         if (fixture.getId() == null) {

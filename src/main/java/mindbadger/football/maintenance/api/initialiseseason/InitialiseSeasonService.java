@@ -10,6 +10,7 @@ import mindbadger.football.maintenance.model.seasondivision.SeasonDivision;
 import mindbadger.football.maintenance.model.seasondivisionteam.SeasonDivisionTeam;
 import mindbadger.football.maintenance.model.team.Team;
 import mindbadger.football.maintenance.model.webreaderfixture.WebReaderFixture;
+import mindbadger.football.maintenance.util.FixtureCompositeKeyGenerator;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -110,7 +111,7 @@ public class InitialiseSeasonService {
                             fixture.getAttributes().setDivisionId(divId);
                             fixture.getAttributes().setHomeTeamId(homeTeamId);
                             fixture.getAttributes().setAwayTeamId(awayTeamId);
-                            logger.info("Fixture missing,so adding : " + fixtureMap);
+                            logger.info("Fixture missing,so adding : " + key);
                             fixtureMap.put(key, fixture);
                         }
                     }
@@ -179,8 +180,8 @@ public class InitialiseSeasonService {
         seasonDivision.getAttributes().setDivisionId(divisionId);
         seasonDivisionMap.put(seasonDivision.getUniqueKey(), seasonDivision);
 
-        logger.debug("Web reader home team id = " + webReaderFixture2.getHomeTeamId());
-        logger.debug("Web reader away team id = " + webReaderFixture2.getAwayTeamId());
+//        logger.debug("Web reader home team id = " + webReaderFixture2.getHomeTeamId());
+//        logger.debug("Web reader away team id = " + webReaderFixture2.getAwayTeamId());
 
         String homeTeamId = getTeamIdForWebReaderTeamAndCreateIfNotExists(webReaderFixture2.getHomeTeamId(), webReaderFixture2.getHomeTeamName());
         SeasonDivisionTeam seasonDivisionTeam = new SeasonDivisionTeam();
@@ -216,7 +217,7 @@ public class InitialiseSeasonService {
         String divisionId = mappingCache.getMappedDivisions().get(webReaderFixture.getDivisionId());
         String homeTeamId = mappingCache.getMappedTeams().get(webReaderFixture.getHomeTeamId());
         String awayTeamId = mappingCache.getMappedTeams().get(webReaderFixture.getAwayTeamId());
-        return String.format("%d-%s-%s-%s",
+        return FixtureCompositeKeyGenerator.generateFor(
                 webReaderFixture.getSeasonId(),
                 divisionId,
                 homeTeamId,

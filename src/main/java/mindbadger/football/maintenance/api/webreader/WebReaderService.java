@@ -63,7 +63,7 @@ public class WebReaderService {
         try {
             response = serviceInvoker.get(url, MediaType.APPLICATION_JSON, params);
 
-            logger.debug("RESPONSE FROM get = " + response);
+//            logger.debug("RESPONSE FROM get = " + response);
 
             Gson gson = new Gson();
             WebReaderFixture[] fixtures = gson.fromJson(response, WebReaderFixture[].class);
@@ -71,7 +71,7 @@ public class WebReaderService {
         } catch (IOException | URISyntaxException e) {
             if (retryCount < 5) {
                 retryCount++;
-                logger.debug("... retrying ...");
+                logger.debug("... retrying ... (" + e.getMessage() + ")");
                 return getFixturesForTeam(seasonNumber, teamId, retryCount);
             }
             System.err.println("Failed to get fixtures from the web for season " + seasonNumber + " and team " + teamId);

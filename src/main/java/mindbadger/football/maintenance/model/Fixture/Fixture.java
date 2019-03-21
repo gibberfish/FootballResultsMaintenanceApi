@@ -5,10 +5,14 @@ import mindbadger.football.maintenance.model.base.JsonApiBase;
 import mindbadger.football.maintenance.model.base.Links;
 import mindbadger.football.maintenance.model.base.Relationship;
 import mindbadger.football.maintenance.model.webreaderfixture.WebReaderFixture;
+import mindbadger.football.maintenance.util.FixtureCompositeKeyGenerator;
+import org.apache.log4j.Logger;
 
 import java.util.Objects;
 
 public class Fixture extends JsonApiBase {
+    private Logger logger = Logger.getLogger(Fixture.class);
+
     private Fixture.Attributes attributes;
     private Fixture.Relationships relationships;
 
@@ -46,11 +50,12 @@ public class Fixture extends JsonApiBase {
     }
 
     public String getUniqueCompositeKey () {
-        return String.format("%d-%s-%s-%s",
+        return FixtureCompositeKeyGenerator.generateFor(
                 attributes.getSeasonNumber(),
                 attributes.divisionId,
                 attributes.getHomeTeamId(),
-                attributes.getAwayTeamId());
+                attributes.getAwayTeamId()
+        );
     }
 
     public void updateFixtureFromWebFixture (WebReaderFixture webReaderFixture, MappingCache mappingCache) {
@@ -93,6 +98,10 @@ public class Fixture extends JsonApiBase {
             modified = true;
             attributes.setAwayGoals(webReaderFixture.getAwayGoals());
         }
+
+        logger.debug("UPDATING FIXTURE...");
+        logger.debug(webReaderFixture.toString());
+        logger.debug(this.toString());
     }
 
     @Override

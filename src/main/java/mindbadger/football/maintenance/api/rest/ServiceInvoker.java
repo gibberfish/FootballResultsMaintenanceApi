@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,6 +77,7 @@ public class ServiceInvoker {
         RequestConfig config = RequestConfig.custom()
                 .setConnectTimeout(timeout * 1000)
                 .setConnectionRequestTimeout(timeout * 1000)
+                .setSocketTimeout(timeout * 1000)
                 .setSocketTimeout(timeout * 1000).build();
         CloseableHttpClient httpclient =
                 HttpClientBuilder.create().setDefaultRequestConfig(config).build();
@@ -94,11 +96,13 @@ public class ServiceInvoker {
             HttpGet httpget = new HttpGet(builder.build());
             httpget.setHeader("Content-type", mediaType);
 
-            logger.debug("... ABOUT TO EXECUTE : " + httpget);
+            logger.debug("... ABOUT TO EXECUTE : " + httpget + " (start " + Instant.now() + ")");
 
             return httpclient.execute(httpget, new GetResponseHandler());
         } finally {
             httpclient.close();
+            logger.debug("... done at " + Instant.now());
+
         }
     }
 
