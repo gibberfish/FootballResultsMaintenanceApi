@@ -73,13 +73,8 @@ public class InitialiseSeasonService {
         addMissingFixtures(season, seasonDivisionTeamMap, fixtureMap);
 
         logger.debug("We have the following " + fixtureMap.size() + " fixtures: ");
-        fixtureDataService.saveFixtures(new ArrayList<Fixture>(fixtureMap.values()));
 
-//        for (Map.Entry<String, Fixture> entry : fixtureMap.entrySet()) {
-//            if (entry.getValue().isModified()) {
-//                fixtureDataService.saveFixture(entry.getValue());
-//            }
-//        }
+        fixtureDataService.saveFixtures(new ArrayList<Fixture>(fixtureMap.values()));
     }
 
     private void addMissingFixtures (String season, Map<String, SeasonDivisionTeam> seasonDivisionTeamMap, Map<String, Fixture> fixtureMap) {
@@ -179,9 +174,6 @@ public class InitialiseSeasonService {
         seasonDivision.getAttributes().setSeasonNumber(Integer.parseInt(season));
         seasonDivision.getAttributes().setDivisionId(divisionId);
         seasonDivisionMap.put(seasonDivision.getUniqueKey(), seasonDivision);
-
-//        logger.debug("Web reader home team id = " + webReaderFixture2.getHomeTeamId());
-//        logger.debug("Web reader away team id = " + webReaderFixture2.getAwayTeamId());
 
         String homeTeamId = getTeamIdForWebReaderTeamAndCreateIfNotExists(webReaderFixture2.getHomeTeamId(), webReaderFixture2.getHomeTeamName());
         SeasonDivisionTeam seasonDivisionTeam = new SeasonDivisionTeam();

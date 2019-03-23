@@ -43,7 +43,7 @@ public class LoadRecentResultsService {
     private MappingCache mappingCache;
 
     public void loadRecentResults() {
-
+        logger.info("Load Recent Results - starting");
         /*
 
         Get current season
@@ -93,14 +93,9 @@ public class LoadRecentResultsService {
                 Fixture matchingFixture = unplayedFixtureMap.get(key);
                 if (matchingFixture != null) {
                     logger.debug("Updating score for : " + matchingFixture);
-                    matchingFixture.getAttributes().setFixtureDate(webReaderFixture.getFixtureDate());
-                    matchingFixture.getAttributes().setHomeGoals(webReaderFixture.getHomeGoals());
-                    matchingFixture.getAttributes().setAwayGoals(webReaderFixture.getAwayGoals());
-
+                    matchingFixture.updateFixtureFromWebFixture(webReaderFixture, mappingCache);
                     unplayedFixtureMap.put(key, matchingFixture);
                 } else {
-                    //TODO How do we know this fixture isn't already there?
-                    //TODO Find fixture matching season, teams & date
                     logger.debug("Creating new fixture");
                     Fixture newFixture = convertWebFixtureToFixture(webReaderFixture);
                     unplayedFixtureMap.put(getKeyFromFixture(newFixture), newFixture);
@@ -108,27 +103,18 @@ public class LoadRecentResultsService {
             }
         };
 
+        // Any fixtures left in the map haven't been played on the dates
         for (Fixture fixture : unplayedFixtureMap.values()) {
 
             if (fixture.getAttributes().getHomeGoals() == null) {
                 logger.debug("Resetting fixture date for " + fixture);
-//                fixture.getAttributes().setFixtureDate(null);
+                fixture.getAttributes().setFixtureDate(null);
             }
-
-//            if (fixture.getAttributes().getAwayGoals() != null){
-//                fixtureDataService.saveFixture(fixture);
-//                logger.debug("SAVING " + fixture);
-//            }
         }
 
-//        for (SingleFixture fixture : fixturesList) {
-//            Response response = seasonDivisionTeamDataService.saveFixture(fixture);
-//            if (response.getStatus() != 201) {
-//                logger.debug("Error saving fixture, status = " + response.getStatus());
-//            }
-//        }
-
         fixtureDataService.saveFixtures(new ArrayList<>(unplayedFixtureMap.values()));
+
+        logger.info("Load Recent Results - complete");
     }
 
     private List<String> getUnplayedFixtureDates (List<Fixture> unplayedFixtures) {
@@ -193,8 +179,4 @@ public class LoadRecentResultsService {
                 fixture.getAttributes().getHomeTeamId(),
                 fixture.getAttributes().getAwayTeamId());
     }
-
-    //TODO Create Team Structure from Fixtures (or can we do this in the loadAllFixturesForSeason
-    // Maybe call it initialiseSeason
-
 }

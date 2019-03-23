@@ -13,9 +13,6 @@ public class CurrentSeasonService {
 
         if (month < 8) year--;
 
-        //TODO Remove this...
-        year = 2017;
-
         return year;
     }
 }
