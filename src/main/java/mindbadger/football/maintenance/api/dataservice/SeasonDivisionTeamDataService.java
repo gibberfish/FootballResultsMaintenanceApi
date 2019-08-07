@@ -109,7 +109,7 @@ public class SeasonDivisionTeamDataService {
         String createUrl = dataApiTarget + "/seasons";
 
         Season season = new Season();
-        season.setId(seasonNumber);
+        //season.setId(seasonNumber); - need to leave the id blank, as this will force a create
         season.getAttributes().setSeasonNumber(Integer.parseInt(seasonNumber));
         SingleSeason singleSeason = new SingleSeason();
         singleSeason.setData(season);

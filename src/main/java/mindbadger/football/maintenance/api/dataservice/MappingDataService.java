@@ -88,6 +88,7 @@ public class MappingDataService {
     public Mapping createTeamMapping(Integer webReaderTeamId, String teamId) {
         String url = dataApiTarget + "/team_mapping";
         Mapping mapping = new Mapping();
+        logger.debug("Creating team mapping between web id " + webReaderTeamId + " and " + teamId);
         mapping.getAttributes().setSourceId(webReaderTeamId);
         mapping.getAttributes().setFraId(teamId);
         SingleMapping singleMapping = new SingleMapping();

@@ -5,6 +5,10 @@ import mindbadger.football.maintenance.model.base.JsonApiBase;
 public class Mapping extends JsonApiBase {
     private Attributes attributes;
 
+    public Mapping () {
+        this.attributes = new Attributes();
+    }
+
     public Attributes getAttributes() {
         return attributes;
     }
