@@ -4,6 +4,7 @@ import mindbadger.football.maintenance.api.MappingCache;
 import mindbadger.football.maintenance.api.dataservice.FixtureDataService;
 import mindbadger.football.maintenance.api.dataservice.MappingDataService;
 import mindbadger.football.maintenance.api.dataservice.SeasonDivisionTeamDataService;
+import mindbadger.football.maintenance.api.table.StatisticsCalculationService;
 import mindbadger.football.maintenance.api.webreader.WebReaderService;
 import mindbadger.football.maintenance.model.Fixture.Fixture;
 import mindbadger.football.maintenance.model.seasondivision.SeasonDivision;
@@ -38,6 +39,9 @@ public class LoadRecentResultsService {
 
     @Autowired
     private CurrentSeasonService currentSeasonService;
+
+    @Autowired
+    private StatisticsCalculationService statisticsCalculationService;
 
     @Autowired
     private MappingCache mappingCache;
@@ -86,11 +90,18 @@ public class LoadRecentResultsService {
         for (String fixtureDate : unplayedFixtureDatesBeforeToday) {
             counter++;
             logger.debug(String.format("--- Reading fixture date %d of %d ---", counter, numberOfDates));
-
+logger.error("XXXXXXX: " + fixtureDate);
             for (WebReaderFixture webReaderFixture : webReaderService.getFixturesForDate(fixtureDate)){
                 //logger.debug(webReaderFixture);
                 String key = getKeyFromWebFixture(webReaderFixture);
                 Fixture matchingFixture = unplayedFixtureMap.get(key);
+
+                if (matchingFixture == null || matchingFixture.getAttributes() == null || matchingFixture.getAttributes().getHomeTeamId() == null || matchingFixture.getAttributes().getAwayTeamId() == null) {
+                    logger.warn("We have null team IDs! Skipping...");
+                    continue;
+                }
+
+
                 if (matchingFixture != null) {
                     logger.debug("Updating score for : " + matchingFixture);
                     matchingFixture.updateFixtureFromWebFixture(webReaderFixture, mappingCache);
@@ -112,7 +123,11 @@ public class LoadRecentResultsService {
             }
         }
 
-        fixtureDataService.saveFixtures(new ArrayList<>(unplayedFixtureMap.values()));
+        List<Fixture> fixtures = new ArrayList<Fixture>(unplayedFixtureMap.values());
+
+        fixtureDataService.saveFixtures(fixtures);
+
+        statisticsCalculationService.updateStatisticsForFixtures(fixtures);
 
         logger.info("Load Recent Results - complete");
     }

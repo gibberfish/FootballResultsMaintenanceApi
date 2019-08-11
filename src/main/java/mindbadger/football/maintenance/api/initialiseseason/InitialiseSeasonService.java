@@ -4,6 +4,7 @@ import mindbadger.football.maintenance.api.MappingCache;
 import mindbadger.football.maintenance.api.dataservice.FixtureDataService;
 import mindbadger.football.maintenance.api.dataservice.MappingDataService;
 import mindbadger.football.maintenance.api.dataservice.SeasonDivisionTeamDataService;
+import mindbadger.football.maintenance.api.table.StatisticsCalculationService;
 import mindbadger.football.maintenance.api.webreader.WebReaderService;
 import mindbadger.football.maintenance.model.Fixture.Fixture;
 import mindbadger.football.maintenance.model.seasondivision.SeasonDivision;
@@ -36,6 +37,9 @@ public class InitialiseSeasonService {
 
     @Autowired
     private WebReaderService webReaderService;
+
+    @Autowired
+    private StatisticsCalculationService statisticsCalculationService;
 
     @Autowired
     private MappingCache mappingCache;
@@ -74,7 +78,11 @@ public class InitialiseSeasonService {
 
         logger.debug("We have the following " + fixtureMap.size() + " fixtures: ");
 
-        fixtureDataService.saveFixtures(new ArrayList<Fixture>(fixtureMap.values()));
+        List<Fixture> fixtures = new ArrayList<Fixture>(fixtureMap.values());
+
+        fixtureDataService.saveFixtures(fixtures);
+
+        statisticsCalculationService.updateStatisticsForFixtures(fixtures);
     }
 
     private void addMissingFixtures (String season, Map<String, SeasonDivisionTeam> seasonDivisionTeamMap, Map<String, Fixture> fixtureMap) {
