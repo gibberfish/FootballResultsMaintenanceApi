@@ -6,8 +6,6 @@ import mindbadger.football.maintenance.model.trackeddivision.TrackedDivision;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 import java.util.*;
 
 @Component
@@ -21,7 +19,6 @@ public class MappingCache {
     private Map<Integer, String> mappedDivisions = new HashMap<>();
     private Map<Integer, String> mappedTeams = new HashMap<>();
 
-    @PostConstruct
     public void refreshCache() {
         List<TrackedDivision> trackedDivisions = mappingDataService.getTrackedDivisions();
         for (TrackedDivision trackedDivision : trackedDivisions) {

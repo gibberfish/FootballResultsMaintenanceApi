@@ -2,7 +2,7 @@ package mindbadger.football.maintenance.api.controller;
 
 import mindbadger.football.maintenance.api.initialiseseason.InitialiseSeasonService;
 import mindbadger.football.maintenance.api.loadrecent.LoadRecentResultsService;
-import mindbadger.football.maintenance.jms.Sender;
+import mindbadger.football.maintenance.jms.LoadFixturesForDateQueueSender;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,7 +18,7 @@ public class MaintenanceController {
     Logger logger = Logger.getLogger(MaintenanceController.class);
 
     @Autowired
-    private Sender sender;
+    private LoadFixturesForDateQueueSender sender;
 
     @Autowired
     private InitialiseSeasonService initialiseSeasonService;
@@ -26,11 +26,11 @@ public class MaintenanceController {
     @Autowired
     private LoadRecentResultsService loadRecentResultsService;
 
-    @GetMapping(value = "/loadRecentResults", produces = "application/json")
-    public ResponseEntity<String> loadRecentResults () {
+    @GetMapping(value = "/loadRecentResultsOLD", produces = "application/json")
+    public ResponseEntity<String> loadRecentResultsOLD () {
         logger.info("Load Recent Results");
 
-        loadRecentResultsService.loadRecentResults();
+        loadRecentResultsService.loadRecentResultsOLD();
 
         return new ResponseEntity<>("Load Recent Results Complete", HttpStatus.OK);
     }
@@ -45,13 +45,13 @@ public class MaintenanceController {
         return new ResponseEntity<>("Initialise Team Complete", HttpStatus.OK);
     }
 
-    @GetMapping(value = "/test", produces = "application/json")
-    public ResponseEntity<String> test (@RequestParam(value="message") String message) {
-        logger.info("Test");
+    @GetMapping(value = "/loadRecentResults", produces = "application/json")
+    public ResponseEntity<String> loadRecentResults () {
+        logger.info("Load Recent Results (using queues)");
 
-        sender.send("boot.q", message);
+        loadRecentResultsService.loadRecentResults();
 
-        return new ResponseEntity<>("Test", HttpStatus.OK);
+        return new ResponseEntity<>("Load Recent Results Complete", HttpStatus.OK);
     }
 
 }

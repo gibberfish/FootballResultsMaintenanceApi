@@ -1,24 +1,11 @@
 package mindbadger.football.maintenance.api.dataservice;
 
-import com.google.gson.Gson;
 import mindbadger.football.maintenance.api.rest.HttpListWrapper;
 import mindbadger.football.maintenance.api.rest.HttpSingleWrapper;
 import mindbadger.football.maintenance.api.rest.ServiceInvoker;
-import mindbadger.football.maintenance.model.Fixture.Fixture;
-import mindbadger.football.maintenance.model.Fixture.FixturesList;
-import mindbadger.football.maintenance.model.Fixture.SingleFixture;
 import mindbadger.football.maintenance.model.mapping.Mapping;
 import mindbadger.football.maintenance.model.mapping.MappingsList;
 import mindbadger.football.maintenance.model.mapping.SingleMapping;
-import mindbadger.football.maintenance.model.season.Season;
-import mindbadger.football.maintenance.model.season.SingleSeason;
-import mindbadger.football.maintenance.model.seasondivision.SeasonDivision;
-import mindbadger.football.maintenance.model.seasondivision.SeasonDivisionsList;
-import mindbadger.football.maintenance.model.seasondivision.SingleSeasonDivision;
-import mindbadger.football.maintenance.model.seasondivisionteam.SeasonDivisionTeam;
-import mindbadger.football.maintenance.model.seasondivisionteam.SingleSeasonDivisionTeam;
-import mindbadger.football.maintenance.model.team.SingleTeam;
-import mindbadger.football.maintenance.model.team.Team;
 import mindbadger.football.maintenance.model.trackeddivision.TrackedDivision;
 import mindbadger.football.maintenance.model.trackeddivision.TrackedDivisionsList;
 import org.apache.commons.collections4.MultiValuedMap;
@@ -29,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Component

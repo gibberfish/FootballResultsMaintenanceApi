@@ -6,6 +6,7 @@ import mindbadger.football.maintenance.api.dataservice.MappingDataService;
 import mindbadger.football.maintenance.api.dataservice.SeasonDivisionTeamDataService;
 import mindbadger.football.maintenance.api.table.StatisticsCalculationService;
 import mindbadger.football.maintenance.api.webreader.WebReaderService;
+import mindbadger.football.maintenance.jms.LoadFixturesForDateQueueSender;
 import mindbadger.football.maintenance.model.Fixture.Fixture;
 import mindbadger.football.maintenance.model.seasondivision.SeasonDivision;
 import mindbadger.football.maintenance.model.webreaderfixture.WebReaderFixture;
@@ -46,8 +47,45 @@ public class LoadRecentResultsService {
     @Autowired
     private MappingCache mappingCache;
 
+    @Autowired
+    private LoadFixturesForDateQueueSender loadFixturesForDateQueueSender;
+
     public void loadRecentResults() {
-        logger.info("Load Recent Results - starting");
+        logger.info("Load Recent Results (using queues)- starting");
+
+        List<Fixture> unplayedFixtures = getUnplayedFixturesBeforeToday();
+        logger.debug("Number of unplayed fixtures before today = " + unplayedFixtures.size());
+
+        List<String> unplayedFixtureDatesBeforeToday = getUnplayedFixtureDates(unplayedFixtures);
+
+        Map<String, Fixture> unplayedFixtureMap = new HashMap<>();
+        for (Fixture fixture : unplayedFixtures) {
+            unplayedFixtureMap.put(getKeyFromFixture(fixture), fixture);
+        }
+
+        int counter = 0;
+        int numberOfDates = unplayedFixtureDatesBeforeToday.size();
+        logger.debug("Number of dates to load fixtures for = " + numberOfDates);
+
+        for (String fixtureDate : unplayedFixtureDatesBeforeToday) {
+            loadFixturesForDateQueueSender.send(fixtureDate);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public void loadRecentResultsOLD() {
+        logger.info("Load Recent Results (OLD)- starting");
         /*
 
         Get current season
