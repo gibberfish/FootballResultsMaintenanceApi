@@ -1,5 +1,6 @@
 package mindbadger.football.maintenance.model.Fixture;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import mindbadger.football.maintenance.api.MappingCache;
 import mindbadger.football.maintenance.model.base.JsonApiBase;
 import mindbadger.football.maintenance.model.base.Links;
@@ -49,6 +50,7 @@ public class Fixture extends JsonApiBase {
         this.modified = modified;
     }
 
+    @JsonIgnore
     public String getUniqueCompositeKey () {
         return FixtureCompositeKeyGenerator.generateFor(
                 attributes.getSeasonNumber(),
@@ -109,6 +111,28 @@ public class Fixture extends JsonApiBase {
         return String.format("[Fixture id = %s, seasonNumber = %d, fixtureDate = %s, divId = %s, homeTeamId = %s, awayTeamId = %s, score = %d - %d, modified = %b]",
                 id ,attributes.getSeasonNumber(), attributes.getFixtureDate(), attributes.getDivisionId(),
                 attributes.getHomeTeamId(), attributes.getAwayTeamId(), attributes.getHomeGoals(), attributes.getAwayGoals(), modified);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Fixture)) return false;
+
+        Fixture objectToCompareTo = (Fixture) o;
+
+        return (objectToCompareTo.getAttributes().getSeasonNumber() == this.getAttributes().getSeasonNumber() &&
+            objectToCompareTo.getAttributes().getDivisionId().equals(this.getAttributes().getDivisionId()) &&
+            objectToCompareTo.getAttributes().getHomeTeamId().equals(this.getAttributes().getHomeTeamId()) &&
+            objectToCompareTo.getAttributes().getAwayTeamId().equals(this.getAttributes().getAwayTeamId()));
+    }
+
+    @Override
+    public int hashCode() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(this.getAttributes().getSeasonNumber());
+        stringBuilder.append(this.getAttributes().getDivisionId());
+        stringBuilder.append(this.getAttributes().getHomeTeamId());
+        stringBuilder.append(this.getAttributes().getAwayTeamId());
+        return Objects.hash(stringBuilder.toString());
     }
 
     public class Attributes {

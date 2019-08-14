@@ -28,6 +28,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -42,6 +43,22 @@ public class FixtureDataService {
 
     @Autowired
     private ServiceInvoker serviceInvoker;
+
+    public List<Fixture> getFixturesOnDate(String fixtureDate) {
+        String url = dataApiTarget + "/fixtures";
+
+        MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
+        params.put("page[limit]", "10000");
+        params.put("filter[fixtureDate][EQ]",fixtureDate);
+
+        HttpListWrapper<FixturesList, Fixture> get = new HttpListWrapper<FixturesList, Fixture>();
+        try {
+            return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
+        } catch (ClientProtocolException e) {
+            logger.error(e.getMessage());
+            return null;
+        }
+    }
 
     public List<Fixture> getUnplayedFixturesForDivisionBeforeToday (String seasonDivisionId) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
