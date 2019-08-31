@@ -4,6 +4,7 @@ import mindbadger.football.maintenance.api.MappingCache;
 import mindbadger.football.maintenance.api.dataservice.FixtureDataService;
 import mindbadger.football.maintenance.api.dataservice.MappingDataService;
 import mindbadger.football.maintenance.api.dataservice.SeasonDivisionTeamDataService;
+import mindbadger.football.maintenance.api.rest.ExternalServiceInvocationException;
 import mindbadger.football.maintenance.api.table.StatisticsCalculationService;
 import mindbadger.football.maintenance.api.webreader.WebReaderService;
 import mindbadger.football.maintenance.jms.LoadFixturesForDateQueueSender;
@@ -50,7 +51,7 @@ public class LoadRecentResultsService {
     @Autowired
     private LoadFixturesForDateQueueSender loadFixturesForDateQueueSender;
 
-    public void loadRecentResults() {
+    public void loadRecentResults() throws ExternalServiceInvocationException {
         logger.info("Load Recent Results (using queues)- starting");
 
         List<Fixture> unplayedFixtures = getUnplayedFixturesBeforeToday();
@@ -84,7 +85,7 @@ public class LoadRecentResultsService {
 
 
 
-    public void loadRecentResultsOLD() {
+    public void loadRecentResultsOLD() throws ExternalServiceInvocationException {
         logger.info("Load Recent Results (OLD)- starting");
         /*
 
@@ -179,17 +180,17 @@ logger.error("XXXXXXX: " + fixtureDate);
         return fixtureDates.keySet().stream().collect(Collectors.toList());
     }
 
-    private List<Fixture> getUnplayedFixturesBeforeToday () {
+    private List<Fixture> getUnplayedFixturesBeforeToday () throws ExternalServiceInvocationException {
         int season = currentSeasonService.getCurrentSeason();
 
         List<Fixture> fixtures = new ArrayList<>();
 
         List<SeasonDivision> seasonDivisions = seasonDivisionTeamDataService.getSeasonDivisions(season);
-        seasonDivisions.forEach(seasonDivision -> {
+        for (SeasonDivision seasonDivision : seasonDivisions) {
             List<Fixture> fixturesForThisDivision =
                     fixtureDataService.getUnplayedFixturesForDivisionBeforeToday(seasonDivision.getId());
             fixtures.addAll(fixturesForThisDivision);
-        });
+        }
 
         return fixtures;
     }

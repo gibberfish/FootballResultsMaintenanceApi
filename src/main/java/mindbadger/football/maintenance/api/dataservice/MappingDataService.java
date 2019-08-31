@@ -1,5 +1,6 @@
 package mindbadger.football.maintenance.api.dataservice;
 
+import mindbadger.football.maintenance.api.rest.ExternalServiceInvocationException;
 import mindbadger.football.maintenance.api.rest.HttpListWrapper;
 import mindbadger.football.maintenance.api.rest.HttpSingleWrapper;
 import mindbadger.football.maintenance.api.rest.ServiceInvoker;
@@ -28,49 +29,34 @@ public class MappingDataService {
     @Autowired
     private ServiceInvoker serviceInvoker;
 
-    public List<TrackedDivision> getTrackedDivisions () {
+    public List<TrackedDivision> getTrackedDivisions() throws ExternalServiceInvocationException  {
         String url = dataApiTarget + "/tracked_division";
         MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
         params.put("page[limit]", "10000");
 
         HttpListWrapper<TrackedDivisionsList, TrackedDivision> get = new HttpListWrapper<TrackedDivisionsList, TrackedDivision>();
-        try {
-            return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, TrackedDivisionsList.class);
-        } catch (ClientProtocolException e) {
-            logger.error(e.getMessage());
-            return null;
-        }
+        return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, TrackedDivisionsList.class);
     }
 
-    public List<Mapping> getDivisionMappings () {
+    public List<Mapping> getDivisionMappings () throws ExternalServiceInvocationException {
         String url = dataApiTarget + "/division_mapping";
         MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
         params.put("page[limit]", "10000");
 
         HttpListWrapper<MappingsList, Mapping> get = new HttpListWrapper<MappingsList, Mapping>();
-        try {
-            return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, MappingsList.class);
-        } catch (ClientProtocolException e) {
-            logger.error(e.getMessage());
-            return null;
-        }
+        return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, MappingsList.class);
     }
 
-    public List<Mapping> getTeamMappings () {
+    public List<Mapping> getTeamMappings () throws ExternalServiceInvocationException {
         String url = dataApiTarget + "/team_mapping";
         MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
         params.put("page[limit]", "10000");
 
         HttpListWrapper<MappingsList, Mapping> get = new HttpListWrapper<MappingsList, Mapping>();
-        try {
-            return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, MappingsList.class);
-        } catch (ClientProtocolException e) {
-            logger.error(e.getMessage());
-            return null;
-        }
+        return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, MappingsList.class);
     }
 
-    public Mapping createTeamMapping(Integer webReaderTeamId, String teamId) {
+    public Mapping createTeamMapping(Integer webReaderTeamId, String teamId) throws ExternalServiceInvocationException {
         String url = dataApiTarget + "/team_mapping";
         Mapping mapping = new Mapping();
         logger.debug("Creating team mapping between web id " + webReaderTeamId + " and " + teamId);
@@ -80,12 +66,7 @@ public class MappingDataService {
         singleMapping.setData(mapping);
 
         HttpSingleWrapper<SingleMapping, Mapping> save = new HttpSingleWrapper<>();
-        try {
-            SingleMapping savedMapping = save.createOrUpdate(url, singleMapping, ServiceInvoker.APPLICATION_VND_API_JSON, SingleMapping.class);
-            return savedMapping.getData();
-        } catch (ClientProtocolException ex) {
-            ex.printStackTrace();
-            return null;
-        }
+        SingleMapping savedMapping = save.createOrUpdate(url, singleMapping, ServiceInvoker.APPLICATION_VND_API_JSON, SingleMapping.class);
+        return savedMapping.getData();
     }
 }

@@ -22,29 +22,29 @@ public class HttpListWrapper<L extends JsonApiList, C extends JsonApiBase> {
         serviceInvoker = (ServiceInvoker) ApplicationContextProvider.getApplicationContext().getBean("serviceInvoker");
     }
 
-    public List<C> getList (String url, String mediaType, Class<L> type) throws ClientProtocolException {
+    public List<C> getList (String url, String mediaType, Class<L> type) throws ExternalServiceInvocationException {
         MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
         return getList(url, mediaType, params, type);
     }
 
-    public List<C> getList (String url, String mediaType, MultiValuedMap<String, String> params, Class<L> type) throws ClientProtocolException {
+    public List<C> getList (String url, String mediaType, MultiValuedMap<String, String> params, Class<L> type) throws ExternalServiceInvocationException {
         try {
             String response = serviceInvoker.get(url, mediaType, params);
             Gson gson = new Gson();
             L mappingsList = gson.fromJson(response, type);
             return mappingsList.getData();
         } catch (ClientProtocolException e) {
-            throw e;
+            throw new ExternalServiceInvocationException(e);
         } catch (IOException e) {
             logger.error("IOException executing getList: " + e.getMessage());
-            throw new RuntimeException(e);
+            throw new ExternalServiceInvocationException(e);
         } catch (URISyntaxException e) {
             logger.error("URISyntaxException executing getList: " + e.getMessage());
-            throw new RuntimeException(e);
+            throw new ExternalServiceInvocationException(e);
         }
     }
 
-    public void saveList (String url, L listOfObjectsToSave, String mediaType, Class<L> type) throws ClientProtocolException {
+    public void saveList (String url, L listOfObjectsToSave, String mediaType, Class<L> type) throws ExternalServiceInvocationException {
         Gson gson = new Gson();
         String payload = gson.toJson(listOfObjectsToSave);
 
@@ -52,10 +52,10 @@ public class HttpListWrapper<L extends JsonApiList, C extends JsonApiBase> {
         try {
             response = serviceInvoker.put(url, ServiceInvoker.APPLICATION_VND_API_JSON, payload);
         } catch (ClientProtocolException e) {
-            throw e;
+            throw new ExternalServiceInvocationException(e);
         } catch (IOException e) {
             logger.error("URISyntaxException executing saveList: " + e.getMessage());
-            throw new RuntimeException(e);
+            throw new ExternalServiceInvocationException(e);
         }
     }
 }

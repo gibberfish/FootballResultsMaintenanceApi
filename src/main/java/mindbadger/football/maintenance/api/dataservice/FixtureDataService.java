@@ -1,6 +1,7 @@
 package mindbadger.football.maintenance.api.dataservice;
 
 import com.google.gson.Gson;
+import mindbadger.football.maintenance.api.rest.ExternalServiceInvocationException;
 import mindbadger.football.maintenance.api.rest.HttpListWrapper;
 import mindbadger.football.maintenance.api.rest.HttpSingleWrapper;
 import mindbadger.football.maintenance.api.rest.ServiceInvoker;
@@ -33,6 +34,8 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class FixtureDataService {
@@ -44,7 +47,7 @@ public class FixtureDataService {
     @Autowired
     private ServiceInvoker serviceInvoker;
 
-    public List<Fixture> getFixturesOnDate(String fixtureDate) {
+    public List<Fixture> getFixturesOnDate(String fixtureDate) throws ExternalServiceInvocationException {
         String url = dataApiTarget + "/fixtures";
 
         MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
@@ -52,15 +55,26 @@ public class FixtureDataService {
         params.put("filter[fixtureDate][EQ]",fixtureDate);
 
         HttpListWrapper<FixturesList, Fixture> get = new HttpListWrapper<FixturesList, Fixture>();
-        try {
-            return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
-        } catch (ClientProtocolException e) {
-            logger.error(e.getMessage());
-            return null;
-        }
+        return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
     }
 
-    public List<Fixture> getUnplayedFixturesForDivisionBeforeToday (String seasonDivisionId) {
+    public List<Fixture> getFixturesForTeam(String seasonNumber, String teamId) throws ExternalServiceInvocationException {
+        String url = dataApiTarget + "/fixtures";
+
+        MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
+        params.put("page[limit]", "10000");
+        params.put("filter[homeTeamId][EQ]",teamId);
+
+        HttpListWrapper<FixturesList, Fixture> get = new HttpListWrapper<FixturesList, Fixture>();
+        List<Fixture> homeFixtures = get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
+        params.remove("filter[homeTeamId][EQ]");
+        params.put("filter[awayTeamId][EQ]", teamId);
+        List<Fixture> awayFixtures = get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
+
+        return Stream.concat(homeFixtures.stream(), awayFixtures.stream()).collect(Collectors.toList());
+    }
+
+    public List<Fixture> getUnplayedFixturesForDivisionBeforeToday (String seasonDivisionId) throws ExternalServiceInvocationException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate date = LocalDate.now();
         String dateString = date.format(formatter);
@@ -73,15 +87,10 @@ public class FixtureDataService {
         params.put("filter[fixtureDate][LE]", dateString);
 
         HttpListWrapper<FixturesList, Fixture> get = new HttpListWrapper<FixturesList, Fixture>();
-        try {
-            return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
-        } catch (ClientProtocolException e) {
-            logger.error(e.getMessage());
-            return null;
-        }
+        return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
     }
 
-    public List<Fixture> getAllFixturesForSeason (String seasonNumber) {
+    public List<Fixture> getAllFixturesForSeason (String seasonNumber) throws ExternalServiceInvocationException {
         String url = dataApiTarget + "/fixtures";
 
         MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
@@ -89,15 +98,10 @@ public class FixtureDataService {
         params.put("filter[seasonNumber][EQ]",seasonNumber);
 
         HttpListWrapper<FixturesList, Fixture> get = new HttpListWrapper<FixturesList, Fixture>();
-        try {
-            return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
-        } catch (ClientProtocolException e) {
-            logger.error(e.getMessage());
-            return null;
-        }
+        return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
     }
 
-    private Fixture findExistingFixture (Fixture fixture) {
+    private Fixture findExistingFixture (Fixture fixture) throws ExternalServiceInvocationException {
         String url = dataApiTarget + "/fixtures";
 
         MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
@@ -110,19 +114,14 @@ public class FixtureDataService {
 
         HttpListWrapper<FixturesList, Fixture> get = new HttpListWrapper<FixturesList, Fixture>();
         List<Fixture> fixtures = null;
-        try {
-            fixtures = get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
-            if  (fixtures.size() == 1)
-                return fixtures.get(0);
-            else
-                return fixture;
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
+        fixtures = get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
+        if  (fixtures.size() == 1)
+            return fixtures.get(0);
+        else
             return fixture;
-        }
     }
 
-    public Fixture saveFixture (Fixture fixture) {
+    public Fixture saveFixture (Fixture fixture) throws ExternalServiceInvocationException {
         logger.debug("About to save " + fixture.getUniqueCompositeKey());
 //        Gson gson = new Gson();
 
@@ -137,17 +136,12 @@ public class FixtureDataService {
 
         HttpSingleWrapper<SingleFixture, Fixture> save = new HttpSingleWrapper<SingleFixture, Fixture>();
         SingleFixture savedFixture = null;
-        try {
-            savedFixture = save.createOrUpdate(url, singleFixture, ServiceInvoker.APPLICATION_VND_API_JSON, SingleFixture.class);
-            return savedFixture.getData();
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
+        savedFixture = save.createOrUpdate(url, singleFixture, ServiceInvoker.APPLICATION_VND_API_JSON, SingleFixture.class);
+        return savedFixture.getData();
     }
 
     //TODO change void to returned values
-    public void saveFixtures (List<Fixture> fixtures) {
+    public void saveFixtures (List<Fixture> fixtures) throws ExternalServiceInvocationException {
         logger.debug("About to save " + fixtures.size() + " fixtures");
 
         String url = dataApiTarget + "/bulksave/fixtures";
@@ -156,10 +150,6 @@ public class FixtureDataService {
         fixturesList.setData(fixtures);
 
         HttpListWrapper<FixturesList, Fixture> put = new HttpListWrapper<FixturesList, Fixture>();
-        try {
-            put.saveList(url, fixturesList, ServiceInvoker.APPLICATION_VND_API_JSON, FixturesList.class);
-        } catch (ClientProtocolException e) {
-            e.printStackTrace();
-        }
+        put.saveList(url, fixturesList, ServiceInvoker.APPLICATION_VND_API_JSON, FixturesList.class);
     }
 }

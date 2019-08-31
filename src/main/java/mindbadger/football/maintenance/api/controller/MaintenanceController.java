@@ -2,6 +2,7 @@ package mindbadger.football.maintenance.api.controller;
 
 import mindbadger.football.maintenance.api.initialiseseason.InitialiseSeasonService;
 import mindbadger.football.maintenance.api.loadrecent.LoadRecentResultsService;
+import mindbadger.football.maintenance.api.rest.ExternalServiceInvocationException;
 import mindbadger.football.maintenance.jms.LoadFixturesForDateQueueSender;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,9 +31,13 @@ public class MaintenanceController {
     public ResponseEntity<String> loadRecentResultsOLD () {
         logger.info("Load Recent Results");
 
-        loadRecentResultsService.loadRecentResultsOLD();
-
-        return new ResponseEntity<>("Load Recent Results Complete", HttpStatus.OK);
+        try {
+            loadRecentResultsService.loadRecentResultsOLD();
+            return new ResponseEntity<>("Load Recent Results Complete", HttpStatus.OK);
+        } catch (ExternalServiceInvocationException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Load Recent Results Failed. Error = " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 
@@ -40,18 +45,26 @@ public class MaintenanceController {
     public ResponseEntity<String> loadAllFixturesForSeason (@RequestParam(value="season") String season) {
         logger.info("Initialise Season");
 
-        initialiseSeasonService.initialiseSeason(season);
-
-        return new ResponseEntity<>("Initialise Team Complete", HttpStatus.OK);
+        try {
+            initialiseSeasonService.initialiseSeason(season);
+            return new ResponseEntity<>("Initialise Team Complete", HttpStatus.OK);
+        } catch (ExternalServiceInvocationException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Initialise team Failed. Error = " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping(value = "/loadRecentResults", produces = "application/json")
     public ResponseEntity<String> loadRecentResults () {
         logger.info("Load Recent Results (using queues)");
 
-        loadRecentResultsService.loadRecentResults();
+        try {
+            loadRecentResultsService.loadRecentResults();
+            return new ResponseEntity<>("Load Recent Results Complete", HttpStatus.OK);
+        } catch (ExternalServiceInvocationException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Load Recent Results Failed. Error = " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
-        return new ResponseEntity<>("Load Recent Results Complete", HttpStatus.OK);
     }
-
 }

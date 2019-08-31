@@ -1,6 +1,7 @@
 package mindbadger.football.maintenance.api;
 
 import mindbadger.football.maintenance.api.dataservice.MappingDataService;
+import mindbadger.football.maintenance.api.rest.ExternalServiceInvocationException;
 import mindbadger.football.maintenance.model.mapping.Mapping;
 import mindbadger.football.maintenance.model.trackeddivision.TrackedDivision;
 import org.apache.log4j.Logger;
@@ -19,7 +20,7 @@ public class MappingCache {
     private Map<Integer, String> mappedDivisions = new HashMap<>();
     private Map<Integer, String> mappedTeams = new HashMap<>();
 
-    public void refreshCache() {
+    public void refreshCache() throws ExternalServiceInvocationException {
         List<TrackedDivision> trackedDivisions = mappingDataService.getTrackedDivisions();
         for (TrackedDivision trackedDivision : trackedDivisions) {
             this.trackedDivisions.add(trackedDivision.getAttributes().getSourceId());

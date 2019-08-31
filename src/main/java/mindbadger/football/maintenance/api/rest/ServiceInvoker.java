@@ -3,7 +3,9 @@ package mindbadger.football.maintenance.api.rest;
 import org.apache.commons.collections4.MapIterator;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
+import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.client.utils.URIBuilder;
@@ -13,17 +15,24 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component("serviceInvoker")
 public class ServiceInvoker {
     private Logger logger = Logger.getLogger(ServiceInvoker.class);
+
+    @Value("${service.timeout}")
+    private int timeout;
 
     public static final String APPLICATION_VND_API_JSON = "application/vnd.api+json";
 
@@ -37,7 +46,6 @@ public class ServiceInvoker {
 
         logger.debug("Execute get on " + uri + ", " + mediaType + ", with");
 
-        int timeout = 60;
         RequestConfig config = RequestConfig.custom()
                 .setConnectTimeout(timeout * 1000)
                 .setConnectionRequestTimeout(timeout * 1000)
@@ -62,7 +70,8 @@ public class ServiceInvoker {
 
             logger.debug("... ABOUT TO EXECUTE : " + httpget + " (start " + Instant.now() + ")");
 
-            return httpclient.execute(httpget, new GetResponseHandler());
+            final String result = httpclient.execute(httpget, new GetResponseHandler());
+            return result;
         } finally {
             httpclient.close();
             logger.debug("... done at " + Instant.now());
@@ -96,7 +105,16 @@ public class ServiceInvoker {
 
             httpPost.setEntity(stringData);
 
-            return httpclient.execute(httpPost, new GetResponseHandler());
+            HttpResponse response = httpclient.execute(httpPost);
+            ResponseHandler<String> handler = new GetResponseHandler();
+            String body = handler.handleResponse(response);
+
+            InputStream stream = response.getEntity().getContent();
+            String result = new BufferedReader(new InputStreamReader(stream))
+                    .lines().collect(Collectors.joining("\n"));
+            logger.debug("POST response body = " + result);
+
+            return body;
         } finally {
             httpclient.close();
         }

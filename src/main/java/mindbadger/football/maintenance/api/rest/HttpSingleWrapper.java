@@ -21,31 +21,33 @@ public class HttpSingleWrapper<S extends JsonApiSingle<C>, C extends JsonApiBase
         serviceInvoker = (ServiceInvoker) ApplicationContextProvider.getApplicationContext().getBean("serviceInvoker");
     }
 
-    public C getSingle (String url, String mediaType, Class<S> type) throws ClientProtocolException {
+    public C getSingle (String url, String mediaType, Class<S> type) throws ExternalServiceInvocationException {
         MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
         return getSingle(url, mediaType, params, type);
     }
 
-    public C getSingle (String url, String mediaType, MultiValuedMap<String, String> params, Class<S> type) throws ClientProtocolException {
+    public C getSingle (String url, String mediaType, MultiValuedMap<String, String> params, Class<S> type) throws ExternalServiceInvocationException {
         try {
             String response = serviceInvoker.get(url, mediaType, params);
             Gson gson = new Gson();
             S fixturesList = gson.fromJson(response, type);
             return fixturesList.getData();
         } catch (ClientProtocolException e) {
-            throw e;
+            throw new ExternalServiceInvocationException(e);
         } catch (IOException | URISyntaxException e) {
             logger.error("URISyntaxException executing getSingle: " + e.getMessage());
-            throw new RuntimeException(e);
+            throw new ExternalServiceInvocationException(e);
         }
     }
 
-    public S createOrUpdate (String url, S objectToSave, String mediaType, Class<S> type) throws ClientProtocolException {
+    public S createOrUpdate (String url, S objectToSave, String mediaType, Class<S> type) throws ExternalServiceInvocationException {
         Gson gson = new Gson();
         String payload = gson.toJson(objectToSave);
 
         String response = null;
         try {
+            logger.debug("^^^Create or Update: url=" + url + ", payload=" + payload);
+
             if (objectToSave.getData().getId() == null) {
                 response = serviceInvoker.post(url, ServiceInvoker.APPLICATION_VND_API_JSON, payload);
             } else {
@@ -53,12 +55,16 @@ public class HttpSingleWrapper<S extends JsonApiSingle<C>, C extends JsonApiBase
                 response = serviceInvoker.patch(url, ServiceInvoker.APPLICATION_VND_API_JSON, payload);
             }
 
-            return gson.fromJson(response, type);
+            S gsonResponse = gson.fromJson(response, type);
+            logger.debug("^^^  response=" + gsonResponse.toString());
+
+            return gsonResponse;
         } catch (ClientProtocolException e) {
-            throw e;
+            logger.debug("^^^  error=" + e.getMessage());
+            throw new ExternalServiceInvocationException(e);
         } catch (IOException e) {
             logger.error("URISyntaxException executing createOrUpdate: " + e.getMessage());
-            throw new RuntimeException(e);
+            throw new ExternalServiceInvocationException(e);
         }
     }
 }
