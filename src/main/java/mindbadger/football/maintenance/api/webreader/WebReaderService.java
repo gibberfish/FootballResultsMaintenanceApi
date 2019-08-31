@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import mindbadger.football.maintenance.api.MappingCache;
 import mindbadger.football.maintenance.api.dataservice.SeasonDivisionTeamDataService;
 import mindbadger.football.maintenance.api.rest.ServiceInvoker;
+import mindbadger.football.maintenance.api.rest.SimpleResponse;
 import mindbadger.football.maintenance.model.webreaderfixture.WebReaderFixture;
 import mindbadger.football.maintenance.util.Pauser;
 import org.apache.commons.collections4.MultiValuedMap;
@@ -59,14 +60,14 @@ public class WebReaderService {
             params.put("trackedDiv", trackedDivision.toString());
         }
 
-        String response = null;
+        SimpleResponse response = null;
         try {
             response = serviceInvoker.get(url, MediaType.APPLICATION_JSON, params);
 
 //            logger.debug("RESPONSE FROM get = " + response);
 
             Gson gson = new Gson();
-            WebReaderFixture[] fixtures = gson.fromJson(response, WebReaderFixture[].class);
+            WebReaderFixture[] fixtures = gson.fromJson(response.getBody(), WebReaderFixture[].class);
             return Arrays.stream(fixtures).collect(Collectors.toList());
         } catch (IOException | URISyntaxException e) {
             if (retryCount < 5) {
@@ -91,14 +92,14 @@ public class WebReaderService {
             params.put("trackedDiv", trackedDivision.toString());
         }
 
-        String response = null;
+        SimpleResponse response = null;
         try {
             response = serviceInvoker.get(url, MediaType.APPLICATION_JSON, params);
 
             logger.debug("RESPONSE FROM get = " + response);
 
             Gson gson = new Gson();
-            WebReaderFixture[] fixtures = gson.fromJson(response, WebReaderFixture[].class);
+            WebReaderFixture[] fixtures = gson.fromJson(response.getBody(), WebReaderFixture[].class);
             return Arrays.stream(fixtures).collect(Collectors.toList());
         } catch (IOException | URISyntaxException e) {
             if (retryCount < 5) {

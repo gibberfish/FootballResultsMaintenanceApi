@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -54,7 +55,7 @@ public class FixtureDataService {
         HttpListWrapper<FixturesList, Fixture> get = new HttpListWrapper<FixturesList, Fixture>();
         try {
             return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
-        } catch (ClientProtocolException e) {
+        } catch (IOException e) {
             logger.error(e.getMessage());
             return null;
         }
@@ -75,7 +76,7 @@ public class FixtureDataService {
         HttpListWrapper<FixturesList, Fixture> get = new HttpListWrapper<FixturesList, Fixture>();
         try {
             return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
-        } catch (ClientProtocolException e) {
+        } catch (IOException e) {
             logger.error(e.getMessage());
             return null;
         }
@@ -91,7 +92,7 @@ public class FixtureDataService {
         HttpListWrapper<FixturesList, Fixture> get = new HttpListWrapper<FixturesList, Fixture>();
         try {
             return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
-        } catch (ClientProtocolException e) {
+        } catch (IOException e) {
             logger.error(e.getMessage());
             return null;
         }
@@ -116,7 +117,7 @@ public class FixtureDataService {
                 return fixtures.get(0);
             else
                 return fixture;
-        } catch (ClientProtocolException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             return fixture;
         }
@@ -140,7 +141,7 @@ public class FixtureDataService {
         try {
             savedFixture = save.createOrUpdate(url, singleFixture, ServiceInvoker.APPLICATION_VND_API_JSON, SingleFixture.class);
             return savedFixture.getData();
-        } catch (ClientProtocolException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
         }
@@ -158,7 +159,7 @@ public class FixtureDataService {
         HttpListWrapper<FixturesList, Fixture> put = new HttpListWrapper<FixturesList, Fixture>();
         try {
             put.saveList(url, fixturesList, ServiceInvoker.APPLICATION_VND_API_JSON, FixturesList.class);
-        } catch (ClientProtocolException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

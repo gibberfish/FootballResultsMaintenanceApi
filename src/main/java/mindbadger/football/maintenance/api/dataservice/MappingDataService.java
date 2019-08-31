@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.List;
 
 @Component
@@ -36,7 +37,7 @@ public class MappingDataService {
         HttpListWrapper<TrackedDivisionsList, TrackedDivision> get = new HttpListWrapper<TrackedDivisionsList, TrackedDivision>();
         try {
             return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, TrackedDivisionsList.class);
-        } catch (ClientProtocolException e) {
+        } catch (IOException e) {
             logger.error(e.getMessage());
             return null;
         }
@@ -50,7 +51,7 @@ public class MappingDataService {
         HttpListWrapper<MappingsList, Mapping> get = new HttpListWrapper<MappingsList, Mapping>();
         try {
             return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, MappingsList.class);
-        } catch (ClientProtocolException e) {
+        } catch (IOException e) {
             logger.error(e.getMessage());
             return null;
         }
@@ -64,7 +65,7 @@ public class MappingDataService {
         HttpListWrapper<MappingsList, Mapping> get = new HttpListWrapper<MappingsList, Mapping>();
         try {
             return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, MappingsList.class);
-        } catch (ClientProtocolException e) {
+        } catch (IOException e) {
             logger.error(e.getMessage());
             return null;
         }
@@ -83,7 +84,7 @@ public class MappingDataService {
         try {
             SingleMapping savedMapping = save.createOrUpdate(url, singleMapping, ServiceInvoker.APPLICATION_VND_API_JSON, SingleMapping.class);
             return savedMapping.getData();
-        } catch (ClientProtocolException ex) {
+        } catch (IOException ex) {
             ex.printStackTrace();
             return null;
         }

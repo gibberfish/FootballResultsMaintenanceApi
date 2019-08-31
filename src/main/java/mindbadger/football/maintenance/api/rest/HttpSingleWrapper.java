@@ -21,44 +21,35 @@ public class HttpSingleWrapper<S extends JsonApiSingle<C>, C extends JsonApiBase
         serviceInvoker = (ServiceInvoker) ApplicationContextProvider.getApplicationContext().getBean("serviceInvoker");
     }
 
-    public C getSingle (String url, String mediaType, Class<S> type) throws ClientProtocolException {
+    public C getSingle (String url, String mediaType, Class<S> type) throws IOException {
         MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
         return getSingle(url, mediaType, params, type);
     }
 
-    public C getSingle (String url, String mediaType, MultiValuedMap<String, String> params, Class<S> type) throws ClientProtocolException {
+    public C getSingle (String url, String mediaType, MultiValuedMap<String, String> params, Class<S> type) throws IOException {
         try {
-            String response = serviceInvoker.get(url, mediaType, params);
+            SimpleResponse response = serviceInvoker.get(url, mediaType, params);
             Gson gson = new Gson();
-            S fixturesList = gson.fromJson(response, type);
+            S fixturesList = gson.fromJson(response.getBody(), type);
             return fixturesList.getData();
-        } catch (ClientProtocolException e) {
-            throw e;
-        } catch (IOException | URISyntaxException e) {
+        } catch (URISyntaxException e) {
             logger.error("URISyntaxException executing getSingle: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }
 
-    public S createOrUpdate (String url, S objectToSave, String mediaType, Class<S> type) throws ClientProtocolException {
+    public S createOrUpdate (String url, S objectToSave, String mediaType, Class<S> type) throws IOException {
         Gson gson = new Gson();
         String payload = gson.toJson(objectToSave);
 
-        String response = null;
-        try {
-            if (objectToSave.getData().getId() == null) {
-                response = serviceInvoker.post(url, ServiceInvoker.APPLICATION_VND_API_JSON, payload);
-            } else {
-                url = url + "/" + objectToSave.getData().getId();
-                response = serviceInvoker.patch(url, ServiceInvoker.APPLICATION_VND_API_JSON, payload);
-            }
-
-            return gson.fromJson(response, type);
-        } catch (ClientProtocolException e) {
-            throw e;
-        } catch (IOException e) {
-            logger.error("URISyntaxException executing createOrUpdate: " + e.getMessage());
-            throw new RuntimeException(e);
+        SimpleResponse response = null;
+        if (objectToSave.getData().getId() == null) {
+            response = serviceInvoker.post(url, ServiceInvoker.APPLICATION_VND_API_JSON, payload);
+        } else {
+            url = url + "/" + objectToSave.getData().getId();
+            response = serviceInvoker.patch(url, ServiceInvoker.APPLICATION_VND_API_JSON, payload);
         }
+
+        return gson.fromJson(response.getBody(), type);
     }
 }

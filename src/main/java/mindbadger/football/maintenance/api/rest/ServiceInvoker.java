@@ -27,12 +27,12 @@ public class ServiceInvoker {
 
     public static final String APPLICATION_VND_API_JSON = "application/vnd.api+json";
 
-    public String get(String uri, String mediaType) throws IOException, URISyntaxException {
+    public SimpleResponse get(String uri, String mediaType) throws IOException, URISyntaxException {
         MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
         return get(uri, mediaType, params);
     }
 
-    public String get(String uri, String mediaType, MultiValuedMap<String, String> parameters)
+    public SimpleResponse get(String uri, String mediaType, MultiValuedMap<String, String> parameters)
             throws URISyntaxException, IOException {
 
         logger.debug("Execute get on " + uri + ", " + mediaType + ", with");
@@ -70,7 +70,7 @@ public class ServiceInvoker {
         }
     }
 
-    public String patch(String url, String mediaType, String payload) throws IOException {
+    public SimpleResponse patch(String url, String mediaType, String payload) throws IOException {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpPatch httpPatch = new HttpPatch(url);
@@ -86,7 +86,7 @@ public class ServiceInvoker {
         }
     }
 
-    public String post(String url, String mediaType, String payload) throws IOException {
+    public SimpleResponse post(String url, String mediaType, String payload) throws IOException {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpPost httpPost = new HttpPost(url);
@@ -102,7 +102,7 @@ public class ServiceInvoker {
         }
     }
 
-    public String put(String url, String mediaType, String payload) throws IOException {
+    public SimpleResponse put(String url, String mediaType, String payload) throws IOException {
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
             HttpPut httpPut = new HttpPut(url);

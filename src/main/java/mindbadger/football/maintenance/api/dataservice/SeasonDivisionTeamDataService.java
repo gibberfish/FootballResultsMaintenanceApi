@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.List;
 
 @Component
@@ -39,7 +40,7 @@ public class SeasonDivisionTeamDataService {
         HttpListWrapper<SeasonDivisionsList, SeasonDivision> get = new HttpListWrapper<SeasonDivisionsList, SeasonDivision>();
         try {
             return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, SeasonDivisionsList.class);
-        } catch (ClientProtocolException e) {
+        } catch (IOException e) {
             logger.error(e.getMessage());
             return null;
         }
@@ -54,7 +55,7 @@ public class SeasonDivisionTeamDataService {
         try {
             SeasonDivision seasonDivision = get.getSingle(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivision.class);
             return seasonDivision;
-        } catch (ClientProtocolException e) {
+        } catch (IOException e) {
             logger.debug("Can't find Season Division " + seasonDivisionId);
             logger.debug(e);
             return null;
@@ -70,7 +71,7 @@ public class SeasonDivisionTeamDataService {
         HttpSingleWrapper<SingleSeasonDivision, SeasonDivision> save = new HttpSingleWrapper<SingleSeasonDivision, SeasonDivision>();
         try {
             SingleSeasonDivision seasonDivision = save.createOrUpdate(createUrl, singleSeasonDivision, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivision.class);
-        } catch (ClientProtocolException ex) {
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
@@ -85,7 +86,7 @@ public class SeasonDivisionTeamDataService {
         try {
             SeasonDivisionTeam seasonDivisionTeam = get.getSingle(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivisionTeam.class);
             return seasonDivisionTeam;
-        } catch (ClientProtocolException e) {
+        } catch (IOException e) {
             logger.debug("Can't find Season Division Team " + seasonDivisionTeamId);
             logger.debug(e);
             return null;
@@ -100,7 +101,7 @@ public class SeasonDivisionTeamDataService {
         HttpSingleWrapper<SingleSeasonDivisionTeam, SeasonDivisionTeam> save = new HttpSingleWrapper<>();
         try {
             SingleSeasonDivisionTeam savedFixture = save.createOrUpdate(createUrl, singleSeasonDivisionTeam, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivisionTeam.class);
-        } catch (ClientProtocolException ex) {
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
@@ -117,7 +118,7 @@ public class SeasonDivisionTeamDataService {
         HttpSingleWrapper<SingleSeason, Season> save = new HttpSingleWrapper<>();
         try {
             SingleSeason savedSeason = save.createOrUpdate(createUrl, singleSeason, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeason.class);
-        } catch (ClientProtocolException ex) {
+        } catch (IOException ex) {
             ex.printStackTrace();
         }
     }
@@ -130,7 +131,7 @@ public class SeasonDivisionTeamDataService {
             Season season = get.getSingle(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeason.class);
             logger.debug("Season " + seasonNumber + " already exists");
             return season;
-        } catch (ClientProtocolException e) {
+        } catch (IOException e) {
             logger.debug("Can't find season " + seasonNumber);
             logger.debug(e.getMessage());
             return null;
@@ -148,7 +149,7 @@ public class SeasonDivisionTeamDataService {
         try {
             SingleTeam savedTeam = save.createOrUpdate(url, singleTeam, ServiceInvoker.APPLICATION_VND_API_JSON, SingleTeam.class);
             return savedTeam.getData();
-        } catch (ClientProtocolException ex) {
+        } catch (IOException ex) {
             ex.printStackTrace();
             return null;
         }
