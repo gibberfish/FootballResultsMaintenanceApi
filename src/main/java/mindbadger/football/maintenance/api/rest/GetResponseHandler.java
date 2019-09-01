@@ -16,7 +16,7 @@ public class GetResponseHandler implements ResponseHandler<SimpleResponse> {
     Logger logger = Logger.getLogger(GetResponseHandler.class);
 
     @Override
-    public SimpleResponse handleResponse(HttpResponse response) throws ServiceInvokerException, IOException {
+    public SimpleResponse handleResponse(HttpResponse response) throws IOException {
 
         SimpleResponse simpleResponse = new SimpleResponse ();
 

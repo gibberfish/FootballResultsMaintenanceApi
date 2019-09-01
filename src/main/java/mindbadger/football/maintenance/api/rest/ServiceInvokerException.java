@@ -2,7 +2,9 @@ package mindbadger.football.maintenance.api.rest;
 
 import org.apache.http.client.ClientProtocolException;
 
-public class ServiceInvokerException extends RuntimeException {
+import java.io.IOException;
+
+public class ServiceInvokerException extends IOException {
     private SimpleResponse simpleResponse;
 
     public ServiceInvokerException (SimpleResponse simpleResponse) {

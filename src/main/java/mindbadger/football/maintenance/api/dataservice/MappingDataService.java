@@ -73,7 +73,7 @@ public class MappingDataService {
 
     public Mapping createTeamMapping(Integer webReaderTeamId, String teamId) {
         String url = dataApiTarget + "/team_mapping";
-        Mapping mapping = new Mapping();
+        Mapping mapping = new Mapping("team_mapping");
         logger.debug("Creating team mapping between web id " + webReaderTeamId + " and " + teamId);
         mapping.getAttributes().setSourceId(webReaderTeamId);
         mapping.getAttributes().setFraId(teamId);

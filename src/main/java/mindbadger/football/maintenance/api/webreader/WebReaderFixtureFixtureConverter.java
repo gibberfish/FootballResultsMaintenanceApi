@@ -72,15 +72,16 @@ public class WebReaderFixtureFixtureConverter {
         createSeasonDivisionTeamIfNotExists(seasonDivision, awayTeamId);
     }
 
-    private void createSeasonDivisionTeamIfNotExists(SeasonDivision seasonDivision, String teamId) throws IOException {
+    private void createSeasonDivisionTeamIfNotExists(SeasonDivision seasonDivision, String teamId) {
         SeasonDivisionTeam seasonDivisionTeam = new SeasonDivisionTeam();
         seasonDivisionTeam.getAttributes().setSeasonNumber(seasonDivision.getAttributes().getSeasonNumber());
         seasonDivisionTeam.getAttributes().setDivisionId(seasonDivision.getAttributes().getDivisionId());
         seasonDivisionTeam.getAttributes().setTeamId(teamId);
 
-        SeasonDivisionTeam seasonDivisionTeamRetrieved = seasonDivisionTeamDataService.getSeasonDivisionTeam(seasonDivisionTeam);
-
-        if (seasonDivisionTeamRetrieved == null) {
+        SeasonDivisionTeam seasonDivisionTeamRetrieved = null;
+        try {
+            seasonDivisionTeamRetrieved = seasonDivisionTeamDataService.getSeasonDivisionTeam(seasonDivisionTeam);
+        } catch (IOException e) {
             logger.info("SeasonDivisionTeam " + seasonDivisionTeam + " doesn't exist, so creating it...");
             seasonDivisionTeamDataService.createSeasonDivisionTeam(seasonDivisionTeam);
         }

@@ -77,21 +77,15 @@ public class SeasonDivisionTeamDataService {
         }
     }
 
-    public SeasonDivisionTeam getSeasonDivisionTeam(SeasonDivisionTeam seasonDivisionTeamId) {
+    public SeasonDivisionTeam getSeasonDivisionTeam(SeasonDivisionTeam seasonDivisionTeamId) throws IOException {
         String findUrl = dataApiTarget + "/seasonDivisionTeams" + "/" +
                 seasonDivisionTeamId.getAttributes().getSeasonNumber() + "_" +
                 seasonDivisionTeamId.getAttributes().getDivisionId() + "_" +
                 seasonDivisionTeamId.getAttributes().getTeamId();
 
         HttpSingleWrapper<SingleSeasonDivisionTeam, SeasonDivisionTeam> get = new HttpSingleWrapper<>();
-        try {
-            SeasonDivisionTeam seasonDivisionTeam = get.getSingle(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivisionTeam.class);
-            return seasonDivisionTeam;
-        } catch (IOException e) {
-            logger.debug("Can't find Season Division Team " + seasonDivisionTeamId);
-            logger.debug(e);
-            return null;
-        }
+        SeasonDivisionTeam seasonDivisionTeam = get.getSingle(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivisionTeam.class);
+        return seasonDivisionTeam;
     }
 
     public void createSeasonDivisionTeam(SeasonDivisionTeam seasonDivisionTeam) {
