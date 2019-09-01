@@ -12,6 +12,7 @@ import mindbadger.football.maintenance.model.seasondivisionteam.SeasonDivisionTe
 import mindbadger.football.maintenance.model.seasondivisionteam.SingleSeasonDivisionTeam;
 import mindbadger.football.maintenance.model.team.SingleTeam;
 import mindbadger.football.maintenance.model.team.Team;
+import mindbadger.football.maintenance.model.team.TeamsList;
 import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
 import org.apache.http.client.ClientProtocolException;
@@ -133,6 +134,31 @@ public class SeasonDivisionTeamDataService {
             return season;
         } catch (IOException e) {
             logger.debug("Can't find season " + seasonNumber);
+            logger.debug(e.getMessage());
+            return null;
+        }
+    }
+
+    public Team getTeamWithName (String teamName) {
+        String findUrl = dataApiTarget + "/teams";
+
+        MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
+        params.put("page[limit]", "10000");
+        params.put("filter[teamName][EQ]",teamName);
+
+        try {
+            HttpListWrapper<TeamsList, Team> get = new HttpListWrapper<>();
+            List<Team> teams = null;
+            teams = get.getList(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON, params, TeamsList.class);
+            if (teams.size() >= 1) {
+                logger.debug("Team with name " + teamName + " exists");
+                return teams.get(0);
+            } else {
+                logger.debug("Team with name " + teamName + " not found");
+                return null;
+            }
+        } catch (IOException e) {
+            logger.debug("Can't get team with name " + teamName);
             logger.debug(e.getMessage());
             return null;
         }

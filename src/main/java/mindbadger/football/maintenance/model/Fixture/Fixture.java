@@ -34,6 +34,7 @@ public class Fixture extends JsonApiBase {
         this.attributes = attributes;
     }
 
+    @JsonIgnore
     public Relationships getRelationships() {
         return relationships;
     }
@@ -42,6 +43,7 @@ public class Fixture extends JsonApiBase {
         this.relationships = relationships;
     }
 
+    @JsonIgnore
     public boolean isModified() {
         return modified;
     }

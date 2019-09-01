@@ -8,13 +8,16 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.util.EntityUtils;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 
 public class GetResponseHandler implements ResponseHandler<SimpleResponse> {
+    Logger logger = Logger.getLogger(GetResponseHandler.class);
 
     @Override
     public SimpleResponse handleResponse(HttpResponse response) throws ServiceInvokerException, IOException {
+
         SimpleResponse simpleResponse = new SimpleResponse ();
 
         int status = response.getStatusLine().getStatusCode();
@@ -30,7 +33,6 @@ public class GetResponseHandler implements ResponseHandler<SimpleResponse> {
             JsonElement element = parser.parse(simpleResponse.getBody());
             if(element.isJsonObject()) {
                 JsonObject jsonObject = element.getAsJsonObject();
-
                 JsonElement errors = jsonObject.get("errors");
 
                 if (errors != null && errors.isJsonArray()) {
@@ -39,7 +41,7 @@ public class GetResponseHandler implements ResponseHandler<SimpleResponse> {
 
                     if (firstError != null && firstError.isJsonObject()) {
                         JsonObject firstErrorObject = firstError.getAsJsonObject();
-                        JsonElement detailElement = jsonObject.get("detail");
+                        JsonElement detailElement = firstErrorObject.get("detail");
 
                         if (detailElement != null && detailElement.isJsonPrimitive()) {
                             String detail = detailElement.getAsString();

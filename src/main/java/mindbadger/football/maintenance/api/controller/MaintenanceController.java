@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.io.IOException;
+
 @Controller
 @RequestMapping("maintenance")
 public class MaintenanceController {
@@ -40,9 +42,13 @@ public class MaintenanceController {
     public ResponseEntity<String> loadAllFixturesForSeason (@RequestParam(value="season") String season) {
         logger.info("Initialise Season");
 
-        initialiseSeasonService.initialiseSeason(season);
-
-        return new ResponseEntity<>("Initialise Team Complete", HttpStatus.OK);
+        try {
+            initialiseSeasonService.initialiseSeason(season);
+            return new ResponseEntity<>("Initialise Season Complete", HttpStatus.OK);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Error in Initialise Season", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping(value = "/loadRecentResults", produces = "application/json")

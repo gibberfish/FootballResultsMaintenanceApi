@@ -34,6 +34,8 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class FixtureDataService {
@@ -55,6 +57,27 @@ public class FixtureDataService {
         HttpListWrapper<FixturesList, Fixture> get = new HttpListWrapper<FixturesList, Fixture>();
         try {
             return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            return null;
+        }
+    }
+
+    public List<Fixture> getFixturesForTeam(String seasonNumber, String teamId) {
+        String url = dataApiTarget + "/fixtures";
+
+        MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
+        params.put("page[limit]", "10000");
+        params.put("filter[homeTeamId][EQ]",teamId);
+
+        try {
+            HttpListWrapper<FixturesList, Fixture> get = new HttpListWrapper<FixturesList, Fixture>();
+            List<Fixture> homeFixtures = get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
+            params.remove("filter[homeTeamId][EQ]");
+            params.put("filter[awayTeamId][EQ]", teamId);
+            List<Fixture> awayFixtures = get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
+
+            return Stream.concat(homeFixtures.stream(), awayFixtures.stream()).collect(Collectors.toList());
         } catch (IOException e) {
             logger.error(e.getMessage());
             return null;

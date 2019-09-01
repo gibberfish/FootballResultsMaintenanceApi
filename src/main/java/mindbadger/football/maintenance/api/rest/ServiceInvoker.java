@@ -13,6 +13,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -24,6 +25,9 @@ import java.util.List;
 @Component("serviceInvoker")
 public class ServiceInvoker {
     private Logger logger = Logger.getLogger(ServiceInvoker.class);
+
+    @Value("${service.timeout}")
+    private int timeout;
 
     public static final String APPLICATION_VND_API_JSON = "application/vnd.api+json";
 
@@ -37,7 +41,6 @@ public class ServiceInvoker {
 
         logger.debug("Execute get on " + uri + ", " + mediaType + ", with");
 
-        int timeout = 60;
         RequestConfig config = RequestConfig.custom()
                 .setConnectTimeout(timeout * 1000)
                 .setConnectionRequestTimeout(timeout * 1000)
