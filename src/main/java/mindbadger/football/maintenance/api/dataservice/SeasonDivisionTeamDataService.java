@@ -77,15 +77,15 @@ public class SeasonDivisionTeamDataService {
         }
     }
 
-    public SeasonDivisionTeam getSeasonDivisionTeam(SeasonDivisionTeam seasonDivisionTeamId) throws IOException {
-        String findUrl = dataApiTarget + "/seasonDivisionTeams" + "/" +
-                seasonDivisionTeamId.getAttributes().getSeasonNumber() + "_" +
-                seasonDivisionTeamId.getAttributes().getDivisionId() + "_" +
-                seasonDivisionTeamId.getAttributes().getTeamId();
+    public SeasonDivisionTeam getSeasonDivisionTeam(SeasonDivisionTeam seasonDivisionTeam) throws IOException {
+        String findUrl = dataApiTarget + "/seasonDivisionTeams" + "/" + seasonDivisionTeam.getUniqueKey();
+//                seasonDivisionTeam.getAttributes().getSeasonNumber() + "_" +
+//                seasonDivisionTeam.getAttributes().getDivisionId() + "_" +
+//                seasonDivisionTeam.getAttributes().getTeamId();
 
         HttpSingleWrapper<SingleSeasonDivisionTeam, SeasonDivisionTeam> get = new HttpSingleWrapper<>();
-        SeasonDivisionTeam seasonDivisionTeam = get.getSingle(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivisionTeam.class);
-        return seasonDivisionTeam;
+        SeasonDivisionTeam seasonDivisionTeamFound = get.getSingle(findUrl, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivisionTeam.class);
+        return seasonDivisionTeamFound;
     }
 
     public void createSeasonDivisionTeam(SeasonDivisionTeam seasonDivisionTeam) {
@@ -95,6 +95,7 @@ public class SeasonDivisionTeamDataService {
 
         HttpSingleWrapper<SingleSeasonDivisionTeam, SeasonDivisionTeam> save = new HttpSingleWrapper<>();
         try {
+            logger.debug("About to save new season division team at " + createUrl);
             SingleSeasonDivisionTeam savedFixture = save.createOrUpdate(createUrl, singleSeasonDivisionTeam, ServiceInvoker.APPLICATION_VND_API_JSON, SingleSeasonDivisionTeam.class);
         } catch (IOException ex) {
             ex.printStackTrace();

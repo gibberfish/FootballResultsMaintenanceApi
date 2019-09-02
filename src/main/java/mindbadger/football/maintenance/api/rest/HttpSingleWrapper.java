@@ -44,9 +44,11 @@ public class HttpSingleWrapper<S extends JsonApiSingle<C>, C extends JsonApiBase
 
         SimpleResponse response = null;
         if (objectToSave.getData().getId() == null) {
+            logger.debug("POST: " + payload);
             response = serviceInvoker.post(url, ServiceInvoker.APPLICATION_VND_API_JSON, payload);
         } else {
             url = url + "/" + objectToSave.getData().getId();
+            logger.debug("PATCH: " + payload);
             response = serviceInvoker.patch(url, ServiceInvoker.APPLICATION_VND_API_JSON, payload);
         }
 

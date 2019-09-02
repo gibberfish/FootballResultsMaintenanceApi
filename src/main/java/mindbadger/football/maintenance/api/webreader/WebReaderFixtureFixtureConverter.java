@@ -82,7 +82,7 @@ public class WebReaderFixtureFixtureConverter {
         try {
             seasonDivisionTeamRetrieved = seasonDivisionTeamDataService.getSeasonDivisionTeam(seasonDivisionTeam);
         } catch (IOException e) {
-            logger.info("SeasonDivisionTeam " + seasonDivisionTeam + " doesn't exist, so creating it...");
+            logger.info("SeasonDivisionTeam " + seasonDivisionTeam.getUniqueKey() + " doesn't exist, so creating it...");
             seasonDivisionTeamDataService.createSeasonDivisionTeam(seasonDivisionTeam);
         }
     }
@@ -96,7 +96,7 @@ public class WebReaderFixtureFixtureConverter {
                 team = seasonDivisionTeamDataService.createTeam(teamName);
             }
             teamId = team.getId();
-            mappingDataService.createTeamMapping (webReaderTeamId, teamId);
+            mappingDataService.createTeamMapping (webReaderTeamId, teamId, "soccerbase");
             mappingCache.getMappedTeams().put(webReaderTeamId, teamId);
         }
         logger.debug("Our team ID for web reader id " + webReaderTeamId + " is " + teamId);

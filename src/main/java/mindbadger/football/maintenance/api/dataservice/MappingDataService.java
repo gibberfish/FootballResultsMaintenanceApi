@@ -71,12 +71,13 @@ public class MappingDataService {
         }
     }
 
-    public Mapping createTeamMapping(Integer webReaderTeamId, String teamId) {
+    public Mapping createTeamMapping(Integer webReaderTeamId, String teamId, String dialect) {
         String url = dataApiTarget + "/team_mapping";
         Mapping mapping = new Mapping("team_mapping");
         logger.debug("Creating team mapping between web id " + webReaderTeamId + " and " + teamId);
         mapping.getAttributes().setSourceId(webReaderTeamId);
         mapping.getAttributes().setFraId(teamId);
+        mapping.getAttributes().setDialect(dialect);
         SingleMapping singleMapping = new SingleMapping();
         singleMapping.setData(mapping);
 

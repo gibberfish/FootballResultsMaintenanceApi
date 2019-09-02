@@ -298,7 +298,7 @@ public class InitialiseSeasonService {
             logger.debug("We don't currently have team " + teamName + " ("+teamId+")");
             Team team = seasonDivisionTeamDataService.createTeam(teamName);
             teamId = team.getId();
-            mappingDataService.createTeamMapping (webReaderTeamId, teamId);
+            mappingDataService.createTeamMapping (webReaderTeamId, teamId, "soccerbase");
             mappingCache.getMappedTeams().put(webReaderTeamId, teamId);
         }
         logger.debug("Our team ID for web reader id " + webReaderTeamId + " is " + teamId);
