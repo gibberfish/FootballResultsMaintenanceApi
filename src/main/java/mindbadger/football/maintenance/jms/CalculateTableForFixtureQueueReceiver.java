@@ -11,24 +11,18 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-public class SaveFixtureQueueReceiver {
-    private Logger logger = Logger.getLogger(SaveFixtureQueueReceiver.class);
+public class CalculateTableForFixtureQueueReceiver {
+    private Logger logger = Logger.getLogger(CalculateTableForFixtureQueueReceiver.class);
 
     @Autowired
     private FixtureDataService fixtureDataService;
 
-    @Autowired
-    private CalculateTableForFixtureQueueSender calculateTableForFixtureQueueSender;
-
-    @JmsListener(destination = "${queue.save.fixture}")
+    @JmsListener(destination = "${queue.calculate.table.for.fixture}")
     public void receive(String fixtureJson) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         Fixture fixture = objectMapper.readValue(fixtureJson, Fixture.class);
 
-        logger.debug("Got message from 'save fixture' queue: web fixture = " + fixtureJson);
+        logger.debug("Got message from 'calculate table for fixture' queue: fixture = " + fixtureJson);
 
-        fixtureDataService.saveFixture(fixture);
-
-        calculateTableForFixtureQueueSender.send(fixture);
     }
 }
