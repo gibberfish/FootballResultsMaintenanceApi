@@ -47,6 +47,24 @@ public class FixtureDataService {
     @Autowired
     private ServiceInvoker serviceInvoker;
 
+
+
+
+    public List<Fixture> getFixturesFromHyperlink (String url) {
+        MultiValuedMap<String, String> params = new HashSetValuedHashMap<>();
+
+        HttpListWrapper<FixturesList, Fixture> get = new HttpListWrapper<FixturesList, Fixture>();
+        try {
+            return get.getList(url, ServiceInvoker.APPLICATION_VND_API_JSON, params, FixturesList.class);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+            return null;
+        }
+    }
+
+
+
+
     public List<Fixture> getFixturesOnDate(String fixtureDate) {
         String url = dataApiTarget + "/fixtures";
 

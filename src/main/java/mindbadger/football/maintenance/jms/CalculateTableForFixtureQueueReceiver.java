@@ -1,6 +1,7 @@
 package mindbadger.football.maintenance.jms;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import mindbadger.football.maintenance.api.calculatestatistics.CalculateStatisticsService;
 import mindbadger.football.maintenance.api.dataservice.FixtureDataService;
 import mindbadger.football.maintenance.model.Fixture.Fixture;
 import org.apache.log4j.Logger;
@@ -15,7 +16,7 @@ public class CalculateTableForFixtureQueueReceiver {
     private Logger logger = Logger.getLogger(CalculateTableForFixtureQueueReceiver.class);
 
     @Autowired
-    private FixtureDataService fixtureDataService;
+    private CalculateStatisticsService calculateStatisticsService;
 
     @JmsListener(destination = "${queue.calculate.table.for.fixture}")
     public void receive(String fixtureJson) throws IOException {
@@ -24,5 +25,6 @@ public class CalculateTableForFixtureQueueReceiver {
 
         logger.debug("Got message from 'calculate table for fixture' queue: fixture = " + fixtureJson);
 
+        calculateStatisticsService.calculateStatisticsForFixture (fixture);
     }
 }

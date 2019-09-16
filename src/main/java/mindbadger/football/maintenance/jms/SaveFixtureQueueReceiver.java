@@ -29,6 +29,16 @@ public class SaveFixtureQueueReceiver {
 
         fixtureDataService.saveFixture(fixture);
 
+        /* TODO Logic to see if table needed here
+
+        (1) Delete all tables up to and including this fixture date
+        (2) Get last table date
+        (3) Get last played fixture date
+        (4) Loop through each fixture date in order from after last table to last played fixture
+            (a) Place the season, division and fixture date onto the calculate table queue
+
+         */
+
         calculateTableForFixtureQueueSender.send(fixture);
     }
 }
