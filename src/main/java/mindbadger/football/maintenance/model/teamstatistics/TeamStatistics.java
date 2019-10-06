@@ -4,6 +4,7 @@ import mindbadger.football.maintenance.model.base.JsonApiBase;
 import mindbadger.football.maintenance.model.base.Links;
 import mindbadger.football.maintenance.model.base.Relationship;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -56,16 +57,42 @@ public class TeamStatistics extends JsonApiBase {
     }
 
     public class Attributes {
-        private Map<String, String> statistics;
+        private List<Statistic> statistics;
 
-        public Map<String, String> getStatistics() {
+        public List<Statistic> getStatistics() {
             return statistics;
         }
 
-        public void setStatistics(Map<String, String> statistics) {
+        public void setStatistics(List<Statistic> statistics) {
             this.statistics = statistics;
         }
 
+    }
+
+    public static class Statistic {
+        private String statistic;
+        private Integer value;
+
+        public Statistic (String statistic, Integer value) {
+            this.statistic = statistic;
+            this.value = value;
+        }
+
+        public String getStatistic() {
+            return statistic;
+        }
+
+        public void setStatistic(String statistic) {
+            this.statistic = statistic;
+        }
+
+        public Integer getValue() {
+            return value;
+        }
+
+        public void setValue(Integer value) {
+            this.value = value;
+        }
     }
 
     public class Relationships {

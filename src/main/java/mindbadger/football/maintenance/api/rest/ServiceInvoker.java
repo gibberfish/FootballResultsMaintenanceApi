@@ -120,4 +120,17 @@ public class ServiceInvoker {
             httpclient.close();
         }
     }
+
+    public SimpleResponse delete(String url, String mediaType) throws IOException {
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        try {
+            HttpDelete httpDelete = new HttpDelete(url);
+            httpDelete.setHeader("Content-type", mediaType);
+
+            return httpclient.execute(httpDelete, new GetResponseHandler());
+        } finally {
+            httpclient.close();
+        }
+    }
+
 }

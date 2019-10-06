@@ -1,7 +1,11 @@
 package mindbadger.football.maintenance.api.dataservice;
 
 import mindbadger.football.maintenance.api.rest.HttpListWrapper;
+import mindbadger.football.maintenance.api.rest.HttpSingleWrapper;
 import mindbadger.football.maintenance.api.rest.ServiceInvoker;
+import mindbadger.football.maintenance.model.Fixture.Fixture;
+import mindbadger.football.maintenance.model.Fixture.SingleFixture;
+import mindbadger.football.maintenance.model.teamstatistics.SingleTeamStatistics;
 import mindbadger.football.maintenance.model.teamstatistics.TeamStatistics;
 import mindbadger.football.maintenance.model.teamstatistics.TeamStatisticsList;
 import org.apache.commons.collections4.MultiValuedMap;
@@ -35,4 +39,35 @@ public class TeamStatisticsDataService {
             return null;
         }
     }
+
+    public void deleteTeamStatistics (String url) {
+        HttpSingleWrapper<SingleTeamStatistics, TeamStatistics> delete = new HttpSingleWrapper<SingleTeamStatistics, TeamStatistics>();
+        try {
+            delete.delete(url, ServiceInvoker.APPLICATION_VND_API_JSON);
+        } catch (IOException e) {
+            logger.error(e.getMessage());
+        }
+    }
+
+    public TeamStatistics saveTeamStatistics (TeamStatistics teamStatistics) {
+        logger.debug("About to save teamStatistics" + teamStatistics.toString());
+
+        SingleTeamStatistics singleTeamStatistics = new SingleTeamStatistics();
+        singleTeamStatistics.setData(teamStatistics);
+
+        String url = dataApiTarget + "/teamStatistics";
+        logger.debug("...url" + url);
+
+        HttpSingleWrapper<SingleTeamStatistics, TeamStatistics> save = new HttpSingleWrapper<SingleTeamStatistics, TeamStatistics>();
+        SingleTeamStatistics savedTeamStatisitics = null;
+        try {
+            savedTeamStatisitics = save.createOrUpdate(url, singleTeamStatistics, ServiceInvoker.APPLICATION_VND_API_JSON, SingleTeamStatistics.class);
+            return savedTeamStatisitics.getData();
+        } catch (IOException e) {
+            logger.error("Failed to save team statistics...");
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
+
 }

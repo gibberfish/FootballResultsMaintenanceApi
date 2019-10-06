@@ -11,6 +11,28 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+/*
+
+Example for the queue
+{
+            "id": "430663",
+            "type": "fixtures",
+            "attributes": {
+                "divisionId": "8",
+                "seasonNumber": 2019,
+                "fixtureDate": "2019-08-17",
+                "homeTeamId": "14",
+                "awayTeamId": "17",
+                "homeGoals": 0,
+                "awayGoals": 2
+            }
+}
+
+
+ */
+
+
+
 @Component
 public class CalculateTableForFixtureQueueReceiver {
     private Logger logger = Logger.getLogger(CalculateTableForFixtureQueueReceiver.class);

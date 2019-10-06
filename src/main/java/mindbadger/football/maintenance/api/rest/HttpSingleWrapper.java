@@ -54,4 +54,8 @@ public class HttpSingleWrapper<S extends JsonApiSingle<C>, C extends JsonApiBase
 
         return gson.fromJson(response.getBody(), type);
     }
+
+    public void delete (String url, String mediaType) throws IOException {
+        serviceInvoker.delete(url, ServiceInvoker.APPLICATION_VND_API_JSON);
+    }
 }
