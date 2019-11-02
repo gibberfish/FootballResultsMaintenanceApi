@@ -9,9 +9,12 @@ import mindbadger.football.maintenance.model.webreaderfixture.WebReaderFixture;
 import mindbadger.football.maintenance.util.FixtureCompositeKeyGenerator;
 import org.apache.log4j.Logger;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Objects;
 
-public class FixtureDate extends JsonApiBase {
+public class FixtureDate extends JsonApiBase implements Comparable<FixtureDate>{
     private Logger logger = Logger.getLogger(FixtureDate.class);
 
     private FixtureDate.Attributes attributes;
@@ -61,6 +64,21 @@ public class FixtureDate extends JsonApiBase {
     @Override
     public int hashCode() {
         return Objects.hash(this.attributes.fixtureDate);
+    }
+
+    @Override
+    public int compareTo(FixtureDate fixtureDate) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String fixtureDateStringToCompareTo = fixtureDate.getAttributes().getFixtureDate();
+        String fixtureDateStringForThisObject = getAttributes().getFixtureDate();
+        try {
+            Date dateToCompareTo = sdf.parse(fixtureDateStringToCompareTo);
+            Date dateForThisObject = sdf.parse(fixtureDateStringForThisObject);
+
+            return dateForThisObject.compareTo(dateToCompareTo);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public class Attributes {

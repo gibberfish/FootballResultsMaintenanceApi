@@ -113,13 +113,13 @@ public class WebReaderFixtureFixtureConverter {
         seasonDivision.getAttributes().setSeasonNumber(season);
         seasonDivision.getAttributes().setDivisionId(divisionId);
 
-        SeasonDivision seasonDivisionRetrieved = seasonDivisionTeamDataService.getSeasonDivision(seasonDivision);
+        SeasonDivision seasonDivisionRetrieved = seasonDivisionTeamDataService.getSeasonDivision(seasonDivision.getUniqueKey());
 
         if (seasonDivisionRetrieved == null) {
             logger.info("SeasonDivision " + seasonDivision + " doesn't exist, so creating it...");
             seasonDivisionTeamDataService.createSeasonDivision(seasonDivision);
             //TODO Ideally the create will return an object
-            seasonDivisionRetrieved = seasonDivisionTeamDataService.getSeasonDivision(seasonDivision);
+            seasonDivisionRetrieved = seasonDivisionTeamDataService.getSeasonDivision(seasonDivision.getUniqueKey());
         }
 
         return seasonDivisionRetrieved;

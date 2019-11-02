@@ -47,10 +47,8 @@ public class SeasonDivisionTeamDataService {
         }
     }
 
-    public SeasonDivision getSeasonDivision(SeasonDivision seasonDivisionId) {
-        String findUrl = dataApiTarget + "/seasonDivisions" + "/" +
-                seasonDivisionId.getAttributes().getSeasonNumber() + "_" +
-                seasonDivisionId.getAttributes().getDivisionId();
+    public SeasonDivision getSeasonDivision(String seasonDivisionId) {
+        String findUrl = dataApiTarget + "/seasonDivisions" + "/" + seasonDivisionId;
 
         HttpSingleWrapper<SingleSeasonDivision, SeasonDivision> get = new HttpSingleWrapper<>();
         try {

@@ -1,5 +1,7 @@
 package mindbadger.football.maintenance.api.controller;
 
+import mindbadger.football.maintenance.api.cache.SeasonCache;
+import mindbadger.football.maintenance.api.cache.SeasonDivisionCache;
 import mindbadger.football.maintenance.api.initialiseseason.InitialiseSeasonService;
 import mindbadger.football.maintenance.api.loadrecent.LoadRecentResultsService;
 import mindbadger.football.maintenance.jms.LoadFixturesForDateQueueSender;
@@ -27,6 +29,9 @@ public class MaintenanceController {
 
     @Autowired
     private LoadRecentResultsService loadRecentResultsService;
+
+    @Autowired
+    private SeasonCache seasonCache;
 
     @GetMapping(value = "/loadRecentResultsOLD", produces = "application/json")
     public ResponseEntity<String> loadRecentResultsOLD () {
@@ -58,6 +63,23 @@ public class MaintenanceController {
         loadRecentResultsService.loadRecentResults();
 
         return new ResponseEntity<>("Load Recent Results Complete", HttpStatus.OK);
+    }
+
+    @GetMapping(value = "/test", produces = "application/json")
+    public ResponseEntity<String> test () {
+        logger.info("TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
+        SeasonDivisionCache seasonDivisionCache = seasonCache.getCacheForSeasonDivision("2017_2");
+
+        logger.info("TEST DONE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+
+        String lastPlayedDate = seasonDivisionCache.getLastPlayedFixtureDate();
+        logger.debug("Last played date : "  + lastPlayedDate);
+
+        String lastDateWithStats = seasonDivisionCache.getLastFixtureDateWithStats();
+        logger.debug("Last date with stats : " + lastDateWithStats);
+
+        return new ResponseEntity<>("TEST Complete", HttpStatus.OK);
     }
 
 }

@@ -10,6 +10,7 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.text.ParseException;
 
 /*
 
@@ -41,12 +42,12 @@ public class CalculateTableForFixtureQueueReceiver {
     private CalculateStatisticsService calculateStatisticsService;
 
     @JmsListener(destination = "${queue.calculate.table.for.fixture}")
-    public void receive(String fixtureJson) throws IOException {
+    public void receive(String fixtureJson) throws IOException, ParseException {
         ObjectMapper objectMapper = new ObjectMapper();
         Fixture fixture = objectMapper.readValue(fixtureJson, Fixture.class);
 
         logger.debug("Got message from 'calculate table for fixture' queue: fixture = " + fixtureJson);
 
-        calculateStatisticsService.calculateStatisticsForFixture (fixture);
+        calculateStatisticsService.calculateStatisticsForFixture(fixture);
     }
 }
